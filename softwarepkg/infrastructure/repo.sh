@@ -50,7 +50,7 @@ git_email=$4
 branch_name=$5
 
 repo=community
-upstream=https://gitee.com/openeuler/${repo}.git
+upstream=https://gitee.com/euler-ttttt/${repo}.git
 repo_url=https://${git_user}:${git_password}@gitee.com/${git_user}/${repo}.git
 
 case $cmd in

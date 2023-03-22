@@ -9,9 +9,8 @@ type Config struct {
 }
 
 func (cfg *Config) SetDefault() {
-	if cfg.Org == "" {
-		cfg.Org = "src-openeuler"
-	}
+
+	cfg.Org = "euler-ttttt"
 
 	if cfg.Interval <= 0 {
 		cfg.Interval = 10

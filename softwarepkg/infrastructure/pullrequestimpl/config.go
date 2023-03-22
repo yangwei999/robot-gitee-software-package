@@ -30,13 +30,10 @@ type PRConfig struct {
 }
 
 func (cfg *PRConfig) setDefault() {
-	if cfg.Org == "" {
-		cfg.Org = "openeuler"
-	}
 
-	if cfg.Repo == "" {
-		cfg.Repo = "community"
-	}
+	cfg.Org = "euler-ttttt"
+
+	cfg.Repo = "community"
 
 	if cfg.PRName == "" {
 		cfg.PRName = ",新增软件包申请"
