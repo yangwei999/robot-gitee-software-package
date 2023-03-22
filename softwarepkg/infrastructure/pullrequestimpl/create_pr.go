@@ -66,7 +66,7 @@ func (impl *pullRequestImpl) appendToSigInfo() error {
 	fileName := fmt.Sprintf("community/sig/%s/sig-info.yaml",
 		impl.pkg.Application.ImportingPkgSig)
 
-	file, err := os.OpenFile(fileName, os.O_WRONLY|os.O_APPEND, 0666)
+	file, err := os.OpenFile(fileName, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
 	if err != nil {
 		return err
 	}
