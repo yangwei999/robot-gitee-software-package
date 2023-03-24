@@ -1,105 +1,43 @@
 package pullrequestimpl
 
 import (
-	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
 	"html/template"
-	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain"
 )
 
-type CmdType string
-
-var (
-	cmdInit      = CmdType("init")
-	cmdNewBranch = CmdType("new")
-	cmdCommit    = CmdType("commit")
-)
-
-func (impl *pullRequestImpl) initRepo() error {
-	if s, err := os.Stat(impl.cfg.PR.Repo); err == nil && s.IsDir() {
-		return nil
+func (impl *pullRequestImpl) createPr() error {
+	sigInfoFile := fmt.Sprintf("sig/%s/sig-info.yaml",
+		impl.pkg.Application.ImportingPkgSig)
+	sigInfoData, err := impl.genAppendSigInfoData()
+	if err != nil {
+		return err
 	}
 
-	return impl.execScript(cmdInit)
-}
+	subDirName := strings.ToLower(impl.pkg.Name[:1])
+	newRepoFile := fmt.Sprintf("sig/%s/src-openeuler/%s/%s.yaml",
+		impl.pkg.Application.ImportingPkgSig, subDirName, impl.pkg.Name)
+	newRepoData, err := impl.genNewRepoData()
+	if err != nil {
+		return err
+	}
 
-func (impl *pullRequestImpl) newBranch() error {
-	return impl.execScript(cmdNewBranch)
-}
-
-func (impl *pullRequestImpl) commit() error {
-	return impl.execScript(cmdCommit)
-}
-
-func (impl *pullRequestImpl) execScript(cmdType CmdType) error {
-	cmd := exec.Command(impl.cfg.ShellScript, string(cmdType),
-		impl.cfg.Robot.Username, impl.cfg.Robot.Password,
-		impl.cfg.Robot.Email, impl.branchName())
+	cmd := exec.Command(impl.cfg.ShellScript, impl.cfg.Robot.Username,
+		impl.cfg.Robot.Password, impl.cfg.Robot.Email, impl.branchName(),
+		impl.cfg.PR.Org, impl.cfg.PR.Repo,
+		sigInfoFile, sigInfoData, newRepoFile, newRepoData,
+	)
 
 	if output, err := cmd.CombinedOutput(); err != nil {
 		return errors.New(string(output))
 	}
 
 	return nil
-}
-
-func (impl *pullRequestImpl) modifyFiles() error {
-	if err := impl.appendToSigInfo(); err != nil {
-		return err
-	}
-
-	return impl.newCreateRepoYaml()
-}
-
-func (impl *pullRequestImpl) appendToSigInfo() error {
-	appendContent, err := impl.genAppendSigInfoData()
-	if err != nil {
-		return err
-	}
-
-	fileName := fmt.Sprintf("community/sig/%s/sig-info.yaml",
-		impl.pkg.Application.ImportingPkgSig)
-
-	file, err := os.OpenFile(fileName, os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	write := bufio.NewWriter(file)
-	if _, err = write.WriteString(appendContent); err != nil {
-		return err
-	}
-
-	if err = write.Flush(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (impl *pullRequestImpl) newCreateRepoYaml() error {
-	subDirName := strings.ToLower(impl.pkg.Name[:1])
-	fileName := fmt.Sprintf("community/sig/%s/src-openeuler/%s/%s.yaml",
-		impl.pkg.Application.ImportingPkgSig, subDirName, impl.pkg.Name)
-
-	content, err := impl.genNewRepoData()
-	if err != nil {
-		return err
-	}
-
-	if err = os.MkdirAll(filepath.Dir(fileName), 0755); err != nil {
-		return err
-	}
-
-	return os.WriteFile(fileName, []byte(content), 0644)
 }
 
 func (impl *pullRequestImpl) branchName() string {

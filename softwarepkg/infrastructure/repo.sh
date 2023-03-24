@@ -3,12 +3,12 @@
 set -euo pipefail
 
 init() {
-    if [ -d $repo ]; then
+    if [ -d $repo_dir ]; then
        return
     fi
 
     git clone --depth=1 $repo_url
-    cd $repo
+    cd $repo_dir
 
     git config user.name $git_user
     git config user.email $git_email
@@ -18,7 +18,7 @@ init() {
 }
 
 new_branch() {
-    cd  $repo
+    cd  $repo_dir
 
     git checkout -- .
     git clean -fd
@@ -31,8 +31,21 @@ new_branch() {
     git checkout -b $branch_name
 }
 
+modify() {
+  cd $repo_dir
+
+  echo "$sig_info_content" >> $sig_info_file
+
+  dn=$(dirname $new_repo_file)
+  if [ ! -d $dn ]; then
+     mkdir $dn
+  fi
+
+  echo "$new_repo_content" > $new_repo_file
+}
+
 commit() {
-    cd $repo
+    cd $repo_dir
 
     git add .
 
@@ -43,24 +56,25 @@ commit() {
     git checkout master
 }
 
-cmd=$1
-git_user=$2
-git_password=$3
-git_email=$4
-branch_name=$5
+git_user=$1
+git_password=$2
+git_email=$3
+branch_name=$4
+org=$5
+repo=$6
+sig_info_file=$7
+sig_info_content=$8
+new_repo_file=$9
+new_repo_content=${10}
 
-repo=community
-upstream=https://gitee.com/openeuler/${repo}.git
+upstream=https://gitee.com/${org}/${repo}.git
 repo_url=https://${git_user}:${git_password}@gitee.com/${git_user}/${repo}.git
+repo_dir=$(pwd)/${repo}
 
-case $cmd in
-    "init")
-        init
-        ;;
-    "new")
-        new_branch
-        ;;
-    "commit")
-        commit
-        ;;
-esac
+init
+
+new_branch
+
+modify
+
+commit
