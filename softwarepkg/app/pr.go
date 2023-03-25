@@ -6,6 +6,7 @@ import (
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain"
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain/email"
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain/message"
+	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain/pullrequest"
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain/repository"
 )
 
@@ -17,12 +18,16 @@ type PullRequestService interface {
 }
 
 func NewPullRequestService(
-	r repository.PullRequest, p message.SoftwarePkgMessage, e email.Email,
+	r repository.PullRequest,
+	p message.SoftwarePkgMessage,
+	e email.Email,
+	c pullrequest.PullRequest,
 ) *pullRequestService {
 	return &pullRequestService{
 		repo:     r,
 		producer: p,
 		email:    e,
+		prCli:    c,
 	}
 }
 
@@ -30,6 +35,7 @@ type pullRequestService struct {
 	repo     repository.PullRequest
 	producer message.SoftwarePkgMessage
 	email    email.Email
+	prCli    pullrequest.PullRequest
 }
 
 func (s *pullRequestService) HandleCI(cmd *CmdToHandleCI) error {
@@ -39,13 +45,23 @@ func (s *pullRequestService) HandleCI(cmd *CmdToHandleCI) error {
 	}
 
 	if !cmd.isSuccess() {
-		if err = s.email.Send(pr.Link); err != nil {
+		subject := "the ci of software package check failed"
+		if err = s.email.Send(pr.Link, subject); err != nil {
 			logrus.Errorf("send email failed: %s", err.Error())
 		}
+
+		return nil
 	}
 
-	e := domain.NewPRCIFinishedEvent(&pr, cmd.FailedReason)
-	return s.producer.NotifyCIResult(&e)
+	// TODO check package exists
+
+	if err = s.prCli.Merge(&pr); err != nil {
+		return err
+	}
+
+	pr.SetMerged()
+
+	return s.repo.Save(&pr)
 }
 
 func (s *pullRequestService) HandleRepoCreated(pr *domain.PullRequest, url string) error {

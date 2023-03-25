@@ -1,5 +1,5 @@
 package email
 
 type Email interface {
-	Send(string) error
+	Send(url, subject string) error
 }

@@ -16,7 +16,7 @@ type emailImpl struct {
 	cfg Config
 }
 
-func (impl *emailImpl) Send(url string) error {
+func (impl *emailImpl) Send(url, subject string) error {
 	d := gomail.NewDialer(
 		impl.cfg.EmailServer.Host,
 		impl.cfg.EmailServer.Port,
@@ -24,7 +24,6 @@ func (impl *emailImpl) Send(url string) error {
 		impl.cfg.EmailServer.AuthCode,
 	)
 
-	subject := "the CI of PR in openeuler/community is failed"
 	content := fmt.Sprintf("the pr url: %s", url)
 
 	message := gomail.NewMessage()

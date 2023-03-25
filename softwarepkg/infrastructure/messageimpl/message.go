@@ -15,10 +15,6 @@ type MessageImpl struct {
 	cfg Config
 }
 
-func (m *MessageImpl) NotifyCIResult(e message.EventMessage) error {
-	return send(m.cfg.TopicsToNotify.CIPassed, e)
-}
-
 func (m *MessageImpl) NotifyRepoCreatedResult(e message.EventMessage) error {
 	return send(m.cfg.TopicsToNotify.CreatedRepo, e)
 }
