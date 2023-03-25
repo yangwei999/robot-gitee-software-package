@@ -5,6 +5,7 @@ type EventMessage interface {
 }
 
 type SoftwarePkgMessage interface {
+	NotifyCIResult(EventMessage) error
 	NotifyRepoCreatedResult(EventMessage) error
 	NotifyPRClosed(EventMessage) error
 	NotifyPRMerged(EventMessage) error

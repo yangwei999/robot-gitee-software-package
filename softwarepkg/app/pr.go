@@ -1,6 +1,8 @@
 package app
 
 import (
+	"fmt"
+
 	"github.com/sirupsen/logrus"
 
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain"
@@ -44,16 +46,22 @@ func (s *pullRequestService) HandleCI(cmd *CmdToHandleCI) error {
 		return err
 	}
 
-	if !cmd.isSuccess() {
-		subject := "the ci of software package check failed"
-		if err = s.email.Send(pr.Link, subject); err != nil {
-			logrus.Errorf("send email failed: %s", err.Error())
+	e := domain.NewPRCIFinishedEvent(&pr, cmd.FailedReason, cmd.RepoLink)
+	if err = s.producer.NotifyCIResult(&e); err != nil {
+		return err
+	}
+
+	if cmd.isPkgExists() {
+		if err = s.prCli.Close(&pr); err != nil {
+			logrus.Errorf("close pr failed: %s", err.Error())
 		}
+	}
+
+	if !cmd.isSuccess() {
+		s.ciFailedSendEmail(&pr, cmd)
 
 		return nil
 	}
-
-	// TODO check package exists
 
 	if err = s.prCli.Merge(&pr); err != nil {
 		return err
@@ -101,4 +109,18 @@ func (s *pullRequestService) HandlePRClosed(cmd *CmdToHandlePRClosed) error {
 	}
 
 	return s.repo.Remove(pr.Num)
+}
+
+func (s *pullRequestService) ciFailedSendEmail(
+	pr *domain.PullRequest, cmd *CmdToHandleCI,
+) {
+	subject := fmt.Sprintf(
+		"the ci of software package check failed: %s",
+		cmd.FailedReason,
+	)
+	content := fmt.Sprintf("th pr url is: %s", pr.Link)
+
+	if err := s.email.Send(subject, content); err != nil {
+		logrus.Errorf("send email failed: %s", err.Error())
+	}
 }

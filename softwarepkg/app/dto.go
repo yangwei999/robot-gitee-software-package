@@ -6,11 +6,16 @@ type CmdToHandleNewPkg = domain.SoftwarePkg
 
 type CmdToHandleCI struct {
 	PRNum        int
+	RepoLink     string
 	FailedReason string
 }
 
 func (c *CmdToHandleCI) isSuccess() bool {
 	return c.FailedReason == ""
+}
+
+func (c *CmdToHandleCI) isPkgExists() bool {
+	return c.RepoLink != ""
 }
 
 type CmdToMergePR struct {

@@ -112,7 +112,7 @@ func main() {
 	}
 
 	// start
-	r := newRobot(c, prService)
+	r := newRobot(c, prService, repo, cfg.Watch.Org)
 
 	framework.Run(r, o.service)
 }
