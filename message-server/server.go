@@ -20,12 +20,7 @@ type messageServer struct {
 
 func (m *messageServer) Subscribe(cfg *Config) error {
 	subscribers := map[string]kafka.Handler{
-		cfg.Topics.NewPkg:      m.handleNewPkg,
-		cfg.Topics.ApprovedPkg: m.handleApprovedPkg,
-		cfg.Topics.RejectedPkg: m.handleRejectedPkg,
-		// the abandoned logic is the same as rejected
-		cfg.Topics.AbandonedPkg:     m.handleRejectedPkg,
-		cfg.Topics.AlreadyClosedPkg: m.handleRejectedPkg,
+		cfg.Topics.ApprovedPkg: m.handleNewPkg,
 	}
 
 	return kafka.Instance().Subscribe(cfg.GroupName, subscribers)
@@ -43,32 +38,4 @@ func (m *messageServer) handleNewPkg(msg []byte) error {
 
 	cmd := v.toCmd()
 	return m.service.CreatePR(&cmd)
-}
-
-func (m *messageServer) handleApprovedPkg(msg []byte) error {
-	if len(msg) == 0 {
-		return errors.New("unexpect message: The payload is empty")
-	}
-
-	var v messageOfApprovedPkg
-	if err := json.Unmarshal(msg, &v); err != nil {
-		return err
-	}
-
-	cmd := v.toCmd()
-	return m.service.MergePR(&cmd)
-}
-
-func (m *messageServer) handleRejectedPkg(msg []byte) error {
-	if len(msg) == 0 {
-		return errors.New("unexpect message: The payload is empty")
-	}
-
-	var v messageOfRejectedPkg
-	if err := json.Unmarshal(msg, &v); err != nil {
-		return err
-	}
-
-	cmd := v.toCmd()
-	return m.service.ClosePR(&cmd)
 }

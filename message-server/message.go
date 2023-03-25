@@ -36,25 +36,3 @@ func (msg *messageOfNewPkg) toCmd() app.CmdToCreatePR {
 		},
 	}
 }
-
-type messageOfApprovedPkg struct {
-	PRNum int `json:"pr_num"`
-}
-
-func (msg *messageOfApprovedPkg) toCmd() app.CmdToMergePR {
-	return app.CmdToMergePR{
-		PRNum: msg.PRNum,
-	}
-}
-
-type messageOfRejectedPkg struct {
-	PRNum  int    `json:"pr_num"`
-	Reason string `json:"reason"`
-}
-
-func (msg *messageOfRejectedPkg) toCmd() app.CmdToClosePR {
-	return app.CmdToClosePR{
-		PRNum:  msg.PRNum,
-		Reason: msg.Reason,
-	}
-}
