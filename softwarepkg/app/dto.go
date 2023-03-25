@@ -2,7 +2,7 @@ package app
 
 import "github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain"
 
-type CmdToNewPkg = domain.SoftwarePkg
+type CmdToHandleNewPkg = domain.SoftwarePkg
 
 type CmdToHandleCI struct {
 	PRNum        int
