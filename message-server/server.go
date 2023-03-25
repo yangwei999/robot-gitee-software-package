@@ -20,7 +20,7 @@ type messageServer struct {
 
 func (m *messageServer) Subscribe(cfg *Config) error {
 	subscribers := map[string]kafka.Handler{
-		cfg.Topics.ApprovedPkg: m.handleNewPkg,
+		cfg.Topics.NewPkg: m.handleNewPkg,
 	}
 
 	return kafka.Instance().Subscribe(cfg.GroupName, subscribers)
@@ -31,11 +31,11 @@ func (m *messageServer) handleNewPkg(msg []byte) error {
 		return errors.New("unexpect message: The payload is empty")
 	}
 
-	var v messageOfNewPkg
+	var v msgToHandleNewPkg
 	if err := json.Unmarshal(msg, &v); err != nil {
 		return err
 	}
 
 	cmd := v.toCmd()
-	return m.service.CreatePR(&cmd)
+	return m.service.NewPkg(&cmd)
 }
