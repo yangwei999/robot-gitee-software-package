@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strings"
+
 	sdk "github.com/opensourceways/go-gitee/gitee"
 
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/app"
@@ -9,14 +11,18 @@ import (
 func (bot *robot) handleCILabel(e *sdk.PullRequestEvent, cfg *botConfig) error {
 	dpr, err := bot.repo.Find(int(e.Number))
 	if err != nil {
-		return nil
+		if strings.Contains(err.Error(), "row not found") {
+			return nil
+		} else {
+			return err
+		}
 	}
 
 	labels := e.PullRequest.LabelsToSet()
 
 	if labels.Has(cfg.CILabel.Success) {
 		cmd := bot.ciCmd(e.Number, "", "")
-		if err := bot.prService.HandleCISuccess(&cmd); err != nil {
+		if err := bot.prService.HandleCI(&cmd); err != nil {
 			return err
 		}
 	}
@@ -28,7 +34,7 @@ func (bot *robot) handleCILabel(e *sdk.PullRequestEvent, cfg *botConfig) error {
 			cmd.FailedReason = "package already exists"
 		}
 
-		if err = bot.prService.HandleCIFailed(&cmd); err != nil {
+		if err = bot.prService.HandleCI(&cmd); err != nil {
 			return err
 		}
 	}
