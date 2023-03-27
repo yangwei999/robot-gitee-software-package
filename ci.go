@@ -7,28 +7,28 @@ import (
 )
 
 func (bot *robot) handleCILabel(e *sdk.PullRequestEvent, cfg *botConfig) error {
+	dpr, err := bot.repo.Find(int(e.Number))
+	if err != nil {
+		return nil
+	}
+
 	labels := e.PullRequest.LabelsToSet()
 
 	if labels.Has(cfg.CILabel.Success) {
 		cmd := bot.ciCmd(e.Number, "", "")
-		if err := bot.prService.HandleCI(&cmd); err != nil {
+		if err := bot.prService.HandleCISuccess(&cmd); err != nil {
 			return err
 		}
 	}
 
 	if labels.Has(cfg.CILabel.Fail) {
-		dpr, err := bot.repo.Find(int(e.Number))
-		if err != nil {
-			return err
-		}
-
 		cmd := bot.ciCmd(e.Number, "", "ci check failed")
-		if v, err := bot.cli.GetRepo(bot.SrcOrg, dpr.Pkg.Name); err == nil {
+		if v, err := bot.cli.GetRepo(bot.PkgSrcOrg, dpr.Pkg.Name); err == nil {
 			cmd.RepoLink = v.HtmlUrl
 			cmd.FailedReason = "package already exists"
 		}
 
-		if err = bot.prService.HandleCI(&cmd); err != nil {
+		if err = bot.prService.HandleCIFailed(&cmd); err != nil {
 			return err
 		}
 	}

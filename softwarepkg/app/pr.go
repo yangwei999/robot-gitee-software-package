@@ -13,7 +13,8 @@ import (
 )
 
 type PullRequestService interface {
-	HandleCI(cmd *CmdToHandleCI) error
+	HandleCISuccess(cmd *CmdToHandleCI) error
+	HandleCIFailed(cmd *CmdToHandleCI) error
 	HandleRepoCreated(*domain.PullRequest, string) error
 	HandlePRMerged(cmd *CmdToHandlePRMerged) error
 	HandlePRClosed(cmd *CmdToHandlePRClosed) error
@@ -40,10 +41,15 @@ type pullRequestService struct {
 	prCli    pullrequest.PullRequest
 }
 
-func (s *pullRequestService) HandleCI(cmd *CmdToHandleCI) error {
+func (s *pullRequestService) HandleCISuccess(cmd *CmdToHandleCI) error {
 	pr, err := s.repo.Find(cmd.PRNum)
 	if err != nil {
 		return err
+	}
+
+	if err = s.prCli.Merge(&pr); err != nil {
+		cmd.FailedReason = "merge pr failed"
+		logrus.Errorf("merge pr failed: %s", err.Error())
 	}
 
 	e := domain.NewPRCIFinishedEvent(&pr, cmd.FailedReason, cmd.RepoLink)
@@ -51,25 +57,31 @@ func (s *pullRequestService) HandleCI(cmd *CmdToHandleCI) error {
 		return err
 	}
 
-	if cmd.isPkgExists() {
-		if err = s.prCli.Close(&pr); err != nil {
-			logrus.Errorf("close pr failed: %s", err.Error())
-		}
-	}
-
 	if !cmd.isSuccess() {
-		s.ciFailedSendEmail(&pr, cmd)
-
 		return nil
-	}
-
-	if err = s.prCli.Merge(&pr); err != nil {
-		return err
 	}
 
 	pr.SetMerged()
 
 	return s.repo.Save(&pr)
+}
+
+func (s *pullRequestService) HandleCIFailed(cmd *CmdToHandleCI) error {
+	pr, err := s.repo.Find(cmd.PRNum)
+	if err != nil {
+		return err
+	}
+
+	if cmd.isPkgExisted() {
+		if err = s.prCli.Close(&pr); err != nil {
+			logrus.Errorf("close pr failed: %s", err.Error())
+		}
+	}
+
+	s.ciFailedSendEmail(&pr, cmd)
+
+	e := domain.NewPRCIFinishedEvent(&pr, cmd.FailedReason, cmd.RepoLink)
+	return s.producer.NotifyCIResult(&e)
 }
 
 func (s *pullRequestService) HandleRepoCreated(pr *domain.PullRequest, url string) error {

@@ -28,7 +28,7 @@ func newRobot(
 		cli:       cli,
 		prService: prService,
 		repo:      r,
-		SrcOrg:    org,
+		PkgSrcOrg: org,
 	}
 }
 
@@ -36,7 +36,7 @@ type robot struct {
 	cli       iClient
 	prService app.PullRequestService
 	repo      repository.PullRequest
-	SrcOrg    string
+	PkgSrcOrg string
 }
 
 func (bot *robot) NewConfig() config.Config {

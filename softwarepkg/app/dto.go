@@ -14,7 +14,7 @@ func (c *CmdToHandleCI) isSuccess() bool {
 	return c.FailedReason == ""
 }
 
-func (c *CmdToHandleCI) isPkgExists() bool {
+func (c *CmdToHandleCI) isPkgExisted() bool {
 	return c.RepoLink != ""
 }
 
