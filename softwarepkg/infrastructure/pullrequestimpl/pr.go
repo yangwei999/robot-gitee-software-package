@@ -53,12 +53,10 @@ func (impl *pullRequestImpl) Create(pkg *domain.SoftwarePkg) (pr domain.PullRequ
 		return
 	}
 
-	v, err := impl.submit(pkg)
-	if err != nil {
-		return
+	
+	if v, err := impl.submit(pkg); err == nil {
+		pr = impl.toPullRequest(&v, pkg)
 	}
-
-	pr = impl.toPullRequest(&v, pkg)
 
 	return
 }
