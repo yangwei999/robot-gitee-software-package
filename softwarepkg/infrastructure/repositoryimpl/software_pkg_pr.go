@@ -87,3 +87,7 @@ func (s softwarePkgPR) Remove(num int) error {
 
 	return s.cli.DeleteRecord(&filter)
 }
+
+func (s softwarePkgPR) IsRowNotFound(err error) bool {
+	return s.cli.IsRowNotFound(err)
+}

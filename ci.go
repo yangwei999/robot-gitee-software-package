@@ -1,8 +1,6 @@
 package main
 
 import (
-	"strings"
-
 	sdk "github.com/opensourceways/go-gitee/gitee"
 
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/app"
@@ -11,7 +9,7 @@ import (
 func (bot *robot) handleCILabel(e *sdk.PullRequestEvent, cfg *botConfig) error {
 	dpr, err := bot.repo.Find(int(e.Number))
 	if err != nil {
-		if strings.Contains(err.Error(), "row not found") {
+		if bot.repo.IsRowNotFound(err) {
 			return nil
 		} else {
 			return err
