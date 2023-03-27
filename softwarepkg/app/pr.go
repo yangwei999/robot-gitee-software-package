@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain"
+	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain/code"
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain/email"
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain/message"
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain/pullrequest"
@@ -17,6 +18,7 @@ type PullRequestService interface {
 	HandleRepoCreated(*domain.PullRequest, string) error
 	HandlePRMerged(cmd *CmdToHandlePRMerged) error
 	HandlePRClosed(cmd *CmdToHandlePRClosed) error
+	HandlePushCode(pr *domain.PullRequest) error
 }
 
 func NewPullRequestService(
@@ -24,12 +26,14 @@ func NewPullRequestService(
 	p message.SoftwarePkgMessage,
 	e email.Email,
 	c pullrequest.PullRequest,
+	cd code.Code,
 ) *pullRequestService {
 	return &pullRequestService{
 		repo:     r,
 		producer: p,
 		email:    e,
 		prCli:    c,
+		code:     cd,
 	}
 }
 
@@ -38,6 +42,7 @@ type pullRequestService struct {
 	producer message.SoftwarePkgMessage
 	email    email.Email
 	prCli    pullrequest.PullRequest
+	code     code.Code
 }
 
 func (s *pullRequestService) HandleCI(cmd *CmdToHandleCI) error {
@@ -90,11 +95,26 @@ func (s *pullRequestService) closePR(pr domain.PullRequest) {
 
 func (s *pullRequestService) HandleRepoCreated(pr *domain.PullRequest, url string) error {
 	e := domain.NewRepoCreatedEvent(pr, url)
-	if err := s.producer.NotifyRepoCreatedResult(&e); err != nil {
+
+	return s.producer.NotifyRepoCreatedResult(&e)
+}
+
+func (s *pullRequestService) HandlePushCode(pr *domain.PullRequest) error {
+	e := domain.NewCodePushedEvent(pr, "")
+
+	if err := s.code.Push(pr); err != nil {
+		e.FailedReason = err.Error()
+	}
+
+	if err := s.producer.NotifyCodePushedResult(&e); err != nil {
 		return err
 	}
 
-	return s.repo.Remove(pr.Num)
+	if e.FailedReason == "" {
+		return s.repo.Remove(pr.Num)
+	}
+
+	return nil
 }
 
 func (s *pullRequestService) HandlePRMerged(cmd *CmdToHandlePRMerged) error {

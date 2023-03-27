@@ -27,9 +27,10 @@ func NewPRCIFinishedEvent(
 }
 
 type repoCreatedEvent struct {
-	PkgId    string `json:"pkg_id"`
-	Platform string `json:"platform"`
-	RepoLink string `json:"repo_link"`
+	PkgId        string `json:"pkg_id"`
+	Platform     string `json:"platform"`
+	RepoLink     string `json:"repo_link"`
+	FailedReason string `json:"failed_reason"`
 }
 
 func (e *repoCreatedEvent) Message() ([]byte, error) {
@@ -41,5 +42,15 @@ func NewRepoCreatedEvent(pr *PullRequest, url string) repoCreatedEvent {
 		PkgId:    pr.Pkg.Id,
 		Platform: platformGitee,
 		RepoLink: url,
+	}
+}
+
+type codePushedEvent = repoCreatedEvent
+
+func NewCodePushedEvent(pr *PullRequest, reason string) codePushedEvent {
+	return codePushedEvent{
+		PkgId:        pr.Pkg.Id,
+		Platform:     platformGitee,
+		FailedReason: reason,
 	}
 }

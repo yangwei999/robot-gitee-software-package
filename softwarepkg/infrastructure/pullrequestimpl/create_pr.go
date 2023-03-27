@@ -187,9 +187,15 @@ func (impl *pullRequestImpl) submit() (dpr domain.PullRequest, err error) {
 	}
 
 	dpr = domain.PullRequest{
-		Num:  int(pr.Number),
-		Link: pr.HtmlUrl,
-		Pkg:  impl.pkg.SoftwarePkgBasic,
+		Num:           int(pr.Number),
+		Link:          pr.HtmlUrl,
+		Pkg:           impl.pkg.SoftwarePkgBasic,
+		ImporterName:  impl.pkg.ImporterName,
+		ImporterEmail: impl.pkg.ImporterEmail,
+		SrcCode: domain.SoftwarePkgSourceCode{
+			SpecURL:   impl.pkg.Application.SourceCode.SpecURL,
+			SrcRPMURL: impl.pkg.Application.SourceCode.SrcRPMURL,
+		},
 	}
 
 	return

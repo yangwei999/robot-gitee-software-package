@@ -17,6 +17,7 @@ import (
 	"github.com/opensourceways/robot-gitee-software-package/kafka"
 	"github.com/opensourceways/robot-gitee-software-package/message-server"
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/app"
+	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/codeimpl"
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/emailimpl"
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/messageimpl"
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/postgresql"
@@ -91,8 +92,9 @@ func main() {
 	message := messageimpl.NewMessageImpl(cfg.MessageServer.Message)
 	pullRequest := pullrequestimpl.NewPullRequestImpl(c, cfg.PullRequest)
 	repo := repositoryimpl.NewSoftwarePkgPR(&cfg.Postgresql.Config)
+	code := codeimpl.NewCodeImpl(cfg.PullRequest.Robot, cfg.Code, cfg.Watch.Org)
 
-	prService := app.NewPullRequestService(repo, message, email, pullRequest)
+	prService := app.NewPullRequestService(repo, message, email, pullRequest, code)
 	messageService := app.NewMessageService(repo, pullRequest)
 
 	watch := watchingimpl.NewWatchingImpl(cfg.Watch, c, repo, prService)
