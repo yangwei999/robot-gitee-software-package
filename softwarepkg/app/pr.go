@@ -56,6 +56,11 @@ func (s *pullRequestService) HandleCI(cmd *CmdToHandleCI) error {
 			if err = s.prCli.Close(&pr); err != nil {
 				logrus.Errorf("close pr failed: %s", err.Error())
 			}
+
+			if err = s.repo.Remove(pr.Num); err != nil {
+				logrus.Errorf("remove ps failed: %s", err.Error())
+			}
+
 		} else {
 			s.notifyException(&pr, cmd)
 		}
@@ -95,8 +100,12 @@ func (s *pullRequestService) HandlePRMerged(cmd *CmdToHandlePRMerged) error {
 		return err
 	}
 
-	e := domain.NewPRMergedEvent(&pr, cmd.ApprovedBy)
-	if err = s.producer.NotifyPRMerged(&e); err != nil {
+	if pr.IsMerged() {
+		return nil
+	}
+
+	e := domain.NewPRCIFinishedEvent(&pr, "", "")
+	if err = s.producer.NotifyCIResult(&e); err != nil {
 		return err
 	}
 
@@ -111,12 +120,21 @@ func (s *pullRequestService) HandlePRClosed(cmd *CmdToHandlePRClosed) error {
 		return err
 	}
 
-	e := domain.NewPRClosedEvent(&pr, cmd.Reason, cmd.RejectedBy)
-	if err = s.producer.NotifyPRClosed(&e); err != nil {
-		return err
+	subject := fmt.Sprintf(
+		"the pr of software package was closed by: %s",
+		cmd.RejectedBy,
+	)
+	content := s.emailContent(pr.Link)
+
+	if err = s.email.Send(subject, content); err != nil {
+		logrus.Errorf("send email failed: %s", err.Error())
 	}
 
-	return s.repo.Remove(pr.Num)
+	return nil
+}
+
+func (s *pullRequestService) emailContent(url string) string {
+	return fmt.Sprintf("th pr url is: %s", url)
 }
 
 func (s *pullRequestService) notifyException(
@@ -126,7 +144,7 @@ func (s *pullRequestService) notifyException(
 		"the ci of software package check failed: %s",
 		cmd.FailedReason,
 	)
-	content := fmt.Sprintf("th pr url is: %s", pr.Link)
+	content := s.emailContent(pr.Link)
 
 	if err := s.email.Send(subject, content); err != nil {
 		logrus.Errorf("send email failed: %s", err.Error())
