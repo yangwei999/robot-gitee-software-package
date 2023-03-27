@@ -1,8 +1,8 @@
 package domain
 
 type SoftwarePkgSourceCode struct {
-	Address string
-	License string
+	SpecURL   string
+	SrcRPMURL string
 }
 
 type SoftwarePkgApplication struct {

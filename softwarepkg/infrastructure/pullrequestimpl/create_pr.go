@@ -135,7 +135,7 @@ func (impl *pullRequestImpl) genNewRepoData() (string, error) {
 	}{
 		PkgName:       impl.pkg.Name,
 		PkgDesc:       impl.pkg.Application.PackageDesc,
-		SourceCodeUrl: impl.pkg.Application.SourceCode.Address,
+		SourceCodeUrl: impl.pkg.Application.SourceCode.SrcRPMURL,
 		BranchName:    impl.cfg.PR.NewRepoBranch.Name,
 		ProtectType:   impl.cfg.PR.NewRepoBranch.ProtectType,
 		PublicType:    impl.cfg.PR.NewRepoBranch.PublicType,
