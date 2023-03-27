@@ -40,7 +40,7 @@ func (impl *pullRequestImpl) commit() error {
 
 func (impl *pullRequestImpl) execScript(cmdType CmdType) error {
 	cmd := exec.Command(impl.cfg.ShellScript, string(cmdType),
-		impl.cfg.Robot.Username, impl.cfg.Robot.Password,
+		impl.cfg.Robot.Username, impl.cfg.Robot.Token,
 		impl.cfg.Robot.Email, impl.branchName())
 
 	if output, err := cmd.CombinedOutput(); err != nil {
