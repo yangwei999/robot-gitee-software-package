@@ -8,6 +8,4 @@ type PullRequest interface {
 	Find(int) (domain.PullRequest, error)
 	FindAll(isMerged bool) ([]domain.PullRequest, error)
 	Remove(int) error
-
-	IsRowNotFound(err error) bool
 }

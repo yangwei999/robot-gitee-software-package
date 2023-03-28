@@ -48,6 +48,10 @@ func (s softwarePkgPR) Find(num int) (domain.PullRequest, error) {
 
 	var res SoftwarePkgPRDO
 	if err := s.cli.GetRecord(&filter, &res); err != nil {
+		if s.cli.IsRowNotFound(err) {
+			err = repository.NewErrorResourceNotFound(err)
+		}
+
 		return domain.PullRequest{}, err
 	}
 
@@ -86,8 +90,4 @@ func (s softwarePkgPR) Remove(num int) error {
 	filter := SoftwarePkgPRDO{Num: num}
 
 	return s.cli.DeleteRecord(&filter)
-}
-
-func (s softwarePkgPR) IsRowNotFound(err error) bool {
-	return s.cli.IsRowNotFound(err)
 }

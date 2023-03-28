@@ -53,14 +53,7 @@ func (s *pullRequestService) HandleCI(cmd *CmdToHandleCI) error {
 		}
 	} else {
 		if cmd.isPkgExisted() {
-			if err = s.prCli.Close(&pr); err != nil {
-				logrus.Errorf("close pr failed: %s", err.Error())
-			}
-
-			if err = s.repo.Remove(pr.Num); err != nil {
-				logrus.Errorf("remove ps failed: %s", err.Error())
-			}
-
+			s.closePR(pr)
 		} else {
 			s.notifyException(&pr, cmd)
 		}
@@ -83,6 +76,16 @@ func (s *pullRequestService) mergePR(pr domain.PullRequest) error {
 	}
 
 	return nil
+}
+
+func (s *pullRequestService) closePR(pr domain.PullRequest) {
+	if err := s.prCli.Close(&pr); err != nil {
+		logrus.Errorf("close pr failed: %s", err.Error())
+	}
+
+	if err := s.repo.Remove(pr.Num); err != nil {
+		logrus.Errorf("remove ps failed: %s", err.Error())
+	}
 }
 
 func (s *pullRequestService) HandleRepoCreated(pr *domain.PullRequest, url string) error {

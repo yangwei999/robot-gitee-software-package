@@ -4,16 +4,17 @@ import (
 	sdk "github.com/opensourceways/go-gitee/gitee"
 
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/app"
+	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain/repository"
 )
 
 func (bot *robot) handleCILabel(e *sdk.PullRequestEvent, cfg *botConfig) error {
 	dpr, err := bot.repo.Find(int(e.Number))
 	if err != nil {
-		if bot.repo.IsRowNotFound(err) {
-			return nil
-		} else {
-			return err
+		if repository.IsErrorResourceNotFound(err) {
+			err = nil
 		}
+
+		return err
 	}
 
 	cmd := app.CmdToHandleCI{
