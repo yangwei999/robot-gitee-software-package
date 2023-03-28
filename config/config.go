@@ -11,6 +11,7 @@ import (
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/pullrequestimpl"
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/repositoryimpl"
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/watchingimpl"
+	localutils "github.com/opensourceways/robot-gitee-software-package/utils"
 )
 
 func LoadConfig(path string) (*Config, error) {
@@ -49,6 +50,7 @@ type Config struct {
 	Postgresql    PostgresqlConfig       `json:"postgresql"`
 	PullRequest   pullrequestimpl.Config `json:"pull_request"`
 	Code          codeimpl.Config        `json:"code"`
+	Encryption    localutils.Config      `json:"encryption"`
 }
 
 func (cfg *Config) configItems() []interface{} {

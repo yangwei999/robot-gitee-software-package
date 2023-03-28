@@ -24,6 +24,7 @@ import (
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/pullrequestimpl"
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/repositoryimpl"
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/watchingimpl"
+	"github.com/opensourceways/robot-gitee-software-package/utils"
 )
 
 type options struct {
@@ -88,11 +89,17 @@ func main() {
 	}
 	defer kafka.Exit()
 
+	if err = utils.InitEncryption(cfg.Encryption.EncryptionKey); err != nil {
+		logrus.Errorf("init encryption failed, err:%s", err.Error())
+
+		return
+	}
+
 	email := emailimpl.NewEmailService(cfg.Email)
 	message := messageimpl.NewMessageImpl(cfg.MessageServer.Message)
 	pullRequest := pullrequestimpl.NewPullRequestImpl(c, cfg.PullRequest)
 	repo := repositoryimpl.NewSoftwarePkgPR(&cfg.Postgresql.Config)
-	code := codeimpl.NewCodeImpl(cfg.PullRequest.Robot, cfg.Code, cfg.Watch.Org)
+	code := codeimpl.NewCodeImpl(cfg.Code, cfg.Watch.Org)
 
 	prService := app.NewPullRequestService(repo, message, email, pullRequest, code)
 	messageService := app.NewMessageService(repo, pullRequest)

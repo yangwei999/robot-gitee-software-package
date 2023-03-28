@@ -126,19 +126,17 @@ func (impl *pullRequestImpl) genAppendSigInfoData() (string, error) {
 
 func (impl *pullRequestImpl) genNewRepoData() (string, error) {
 	data := struct {
-		PkgName       string
-		PkgDesc       string
-		SourceCodeUrl string
-		BranchName    string
-		ProtectType   string
-		PublicType    string
+		PkgName     string
+		PkgDesc     string
+		BranchName  string
+		ProtectType string
+		PublicType  string
 	}{
-		PkgName:       impl.pkg.Name,
-		PkgDesc:       impl.pkg.Application.PackageDesc,
-		SourceCodeUrl: impl.pkg.Application.SourceCode.SrcRPMURL,
-		BranchName:    impl.cfg.PR.NewRepoBranch.Name,
-		ProtectType:   impl.cfg.PR.NewRepoBranch.ProtectType,
-		PublicType:    impl.cfg.PR.NewRepoBranch.PublicType,
+		PkgName:     impl.pkg.Name,
+		PkgDesc:     impl.pkg.Application.PackageDesc,
+		BranchName:  impl.cfg.PR.NewRepoBranch.Name,
+		ProtectType: impl.cfg.PR.NewRepoBranch.ProtectType,
+		PublicType:  impl.cfg.PR.NewRepoBranch.PublicType,
 	}
 
 	return impl.genTemplate(impl.cfg.Template.NewRepoFile, data)

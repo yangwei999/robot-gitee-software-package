@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain"
+	"github.com/opensourceways/robot-gitee-software-package/utils"
 )
 
 const (
@@ -22,24 +23,28 @@ type SoftwarePkgPRDO struct {
 	Merged        int       `gorm:"column:merge"`
 	ImporterName  string    `gorm:"column:importer_name"`
 	ImporterEmail string    `gorm:"column:importer_email"`
-	Spec          string    `gorm:"column:spec"`
-	SrcRPM        string    `gorm:"column:src_rpm"`
+	SpecURL       string    `gorm:"column:spec_url"`
+	SrcRPMURL     string    `gorm:"column:src_rpm_url"`
 	CreatedAt     int64     `gorm:"column:created_at"`
 	UpdatedAt     int64     `gorm:"column:updated_at"`
 }
 
-func (s softwarePkgPR) toSoftwarePkgPRDO(p *domain.PullRequest, id uuid.UUID, do *SoftwarePkgPRDO) {
+func (s softwarePkgPR) toSoftwarePkgPRDO(p *domain.PullRequest, id uuid.UUID, do *SoftwarePkgPRDO) (err error) {
 	*do = SoftwarePkgPRDO{
-		PkgId:         id,
-		Num:           p.Num,
-		Link:          p.Link,
-		PkgName:       p.Pkg.Name,
-		ImporterName:  p.ImporterName,
-		ImporterEmail: p.ImporterEmail,
-		Spec:          p.SrcCode.SpecURL,
-		SrcRPM:        p.SrcCode.SrcRPMURL,
-		CreatedAt:     time.Now().Unix(),
-		UpdatedAt:     time.Now().Unix(),
+		PkgId:        id,
+		Num:          p.Num,
+		Link:         p.Link,
+		PkgName:      p.Pkg.Name,
+		ImporterName: p.ImporterName,
+		SpecURL:      p.SrcCode.SpecURL,
+		SrcRPMURL:    p.SrcCode.SrcRPMURL,
+		CreatedAt:    time.Now().Unix(),
+		UpdatedAt:    time.Now().Unix(),
+	}
+
+	do.ImporterEmail, err = toEmailDO(p.ImporterEmail)
+	if err != nil {
+		return
 	}
 
 	if p.IsMerged() {
@@ -47,9 +52,11 @@ func (s softwarePkgPR) toSoftwarePkgPRDO(p *domain.PullRequest, id uuid.UUID, do
 	} else {
 		do.Merged = unMergedStatus
 	}
+
+	return
 }
 
-func (do *SoftwarePkgPRDO) toDomainPullRequest() (pr domain.PullRequest) {
+func (do *SoftwarePkgPRDO) toDomainPullRequest() (pr domain.PullRequest, err error) {
 	pr.Link = do.Link
 	pr.Num = do.Num
 
@@ -60,9 +67,25 @@ func (do *SoftwarePkgPRDO) toDomainPullRequest() (pr domain.PullRequest) {
 	pr.Pkg.Name = do.PkgName
 	pr.Pkg.Id = do.PkgId.String()
 	pr.ImporterName = do.ImporterName
-	pr.ImporterEmail = do.ImporterEmail
-	pr.SrcCode.SpecURL = do.Spec
-	pr.SrcCode.SrcRPMURL = do.SrcRPM
+	pr.SrcCode.SpecURL = do.SpecURL
+	pr.SrcCode.SrcRPMURL = do.SrcRPMURL
+
+	if pr.ImporterEmail, err = toEmail(do.ImporterEmail); err != nil {
+		return
+	}
 
 	return
+}
+
+func toEmailDO(email string) (string, error) {
+	return utils.Encryption.Encrypt([]byte(email))
+}
+
+func toEmail(e string) (string, error) {
+	v, err := utils.Encryption.Decrypt(e)
+	if err != nil {
+		return "", err
+	}
+
+	return string(v), nil
 }

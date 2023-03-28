@@ -37,20 +37,13 @@ func (e *repoCreatedEvent) Message() ([]byte, error) {
 	return json.Marshal(e)
 }
 
-func NewRepoCreatedEvent(pr *PullRequest, url string) repoCreatedEvent {
+func NewRepoCreatedEvent(pr *PullRequest, url, reason string) repoCreatedEvent {
 	return repoCreatedEvent{
-		PkgId:    pr.Pkg.Id,
-		Platform: platformGitee,
-		RepoLink: url,
-	}
-}
-
-type codePushedEvent = repoCreatedEvent
-
-func NewCodePushedEvent(pr *PullRequest, reason string) codePushedEvent {
-	return codePushedEvent{
 		PkgId:        pr.Pkg.Id,
 		Platform:     platformGitee,
+		RepoLink:     url,
 		FailedReason: reason,
 	}
 }
+
+var NewCodePushedEvent = NewRepoCreatedEvent

@@ -94,13 +94,13 @@ func (s *pullRequestService) closePR(pr domain.PullRequest) {
 }
 
 func (s *pullRequestService) HandleRepoCreated(pr *domain.PullRequest, url string) error {
-	e := domain.NewRepoCreatedEvent(pr, url)
+	e := domain.NewRepoCreatedEvent(pr, url, "")
 
 	return s.producer.NotifyRepoCreatedResult(&e)
 }
 
 func (s *pullRequestService) HandlePushCode(pr *domain.PullRequest) error {
-	e := domain.NewCodePushedEvent(pr, "")
+	e := domain.NewCodePushedEvent(pr, "", "")
 
 	if err := s.code.Push(pr); err != nil {
 		e.FailedReason = err.Error()
