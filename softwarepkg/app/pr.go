@@ -84,7 +84,7 @@ func (s *pullRequestService) closePR(pr domain.PullRequest) {
 	}
 
 	if err := s.repo.Remove(pr.Num); err != nil {
-		logrus.Errorf("remove pr failed: %s", err.Error())
+		logrus.Errorf("remove pr/%d failed: %s", pr.Num, err.Error())
 	}
 }
 
