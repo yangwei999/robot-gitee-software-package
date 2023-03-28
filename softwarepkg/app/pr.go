@@ -80,11 +80,11 @@ func (s *pullRequestService) mergePR(pr domain.PullRequest) error {
 
 func (s *pullRequestService) closePR(pr domain.PullRequest) {
 	if err := s.prCli.Close(&pr); err != nil {
-		logrus.Errorf("close pr failed: %s", err.Error())
+		logrus.Errorf("close pr/%d failed: %s", pr.Num, err.Error())
 	}
 
 	if err := s.repo.Remove(pr.Num); err != nil {
-		logrus.Errorf("remove ps failed: %s", err.Error())
+		logrus.Errorf("remove pr failed: %s", err.Error())
 	}
 }
 
