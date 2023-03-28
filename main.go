@@ -99,7 +99,7 @@ func main() {
 	message := messageimpl.NewMessageImpl(cfg.MessageServer.Message)
 	pullRequest := pullrequestimpl.NewPullRequestImpl(c, cfg.PullRequest)
 	repo := repositoryimpl.NewSoftwarePkgPR(&cfg.Postgresql.Config)
-	code := codeimpl.NewCodeImpl(cfg.Code, cfg.Watch.Org)
+	code := codeimpl.NewCodeImpl(cfg.Code)
 
 	prService := app.NewPullRequestService(repo, message, email, pullRequest, code)
 	messageService := app.NewMessageService(repo, pullRequest)

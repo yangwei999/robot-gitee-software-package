@@ -2,23 +2,23 @@ package domain
 
 import "encoding/json"
 
-const platformGitee = "gitee"
+const PlatformGitee = "gitee"
 
-type prCIFinishedEvent struct {
+type PrCIFinishedEvent struct {
 	PkgId        string `json:"pkg_id"`
 	RelevantPR   string `json:"relevant_pr"`
 	RepoLink     string `json:"repo_link"`
 	FailedReason string `json:"failed_reason"`
 }
 
-func (e *prCIFinishedEvent) Message() ([]byte, error) {
+func (e *PrCIFinishedEvent) Message() ([]byte, error) {
 	return json.Marshal(e)
 }
 
 func NewPRCIFinishedEvent(
 	pr *PullRequest, failedReason, repoLink string,
-) prCIFinishedEvent {
-	return prCIFinishedEvent{
+) PrCIFinishedEvent {
+	return PrCIFinishedEvent{
 		PkgId:        pr.Pkg.Id,
 		RelevantPR:   pr.Link,
 		RepoLink:     repoLink,
@@ -26,24 +26,24 @@ func NewPRCIFinishedEvent(
 	}
 }
 
-type repoCreatedEvent struct {
+type RepoCreatedEvent struct {
 	PkgId        string `json:"pkg_id"`
 	Platform     string `json:"platform"`
 	RepoLink     string `json:"repo_link"`
 	FailedReason string `json:"failed_reason"`
 }
 
-func (e *repoCreatedEvent) Message() ([]byte, error) {
+func (e *RepoCreatedEvent) Message() ([]byte, error) {
 	return json.Marshal(e)
 }
 
-func NewRepoCreatedEvent(pr *PullRequest, url, reason string) repoCreatedEvent {
-	return repoCreatedEvent{
+func NewRepoCreatedEvent(pr *PullRequest, url, reason string) RepoCreatedEvent {
+	return RepoCreatedEvent{
 		PkgId:        pr.Pkg.Id,
-		Platform:     platformGitee,
+		Platform:     PlatformGitee,
 		RepoLink:     url,
 		FailedReason: reason,
 	}
 }
 
-var NewCodePushedEvent = NewRepoCreatedEvent
+type CodePushedEvent = RepoCreatedEvent

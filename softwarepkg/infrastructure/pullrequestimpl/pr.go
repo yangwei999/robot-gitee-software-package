@@ -48,7 +48,12 @@ func (impl *pullRequestImpl) Create(pkg *domain.SoftwarePkg) (pr domain.PullRequ
 		return
 	}
 
-	return impl.submit()
+	v, err := impl.submit()
+	if err != nil {
+		return
+	}
+
+	return impl.toPullRequest(&v), nil
 }
 
 func (impl *pullRequestImpl) Merge(pr *domain.PullRequest) error {

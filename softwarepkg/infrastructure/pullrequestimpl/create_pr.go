@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	sdk "github.com/opensourceways/go-gitee/gitee"
+
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain"
 )
 
@@ -169,22 +171,21 @@ func (impl *pullRequestImpl) getRobotLogin() (string, error) {
 	return impl.robotLogin, nil
 }
 
-func (impl *pullRequestImpl) submit() (dpr domain.PullRequest, err error) {
+func (impl *pullRequestImpl) submit() (pr sdk.PullRequest, err error) {
 	robotName, err := impl.getRobotLogin()
 	if err != nil {
 		return
 	}
 
 	head := fmt.Sprintf("%s:%s", robotName, impl.branchName())
-	pr, err := impl.cli.CreatePullRequest(
+	return impl.cli.CreatePullRequest(
 		impl.cfg.PR.Org, impl.cfg.PR.Repo, impl.prName(),
 		impl.pkg.Application.ReasonToImportPkg, head, "master", true,
 	)
-	if err != nil {
-		return
-	}
+}
 
-	dpr = domain.PullRequest{
+func (impl *pullRequestImpl) toPullRequest(pr *sdk.PullRequest) domain.PullRequest {
+	return domain.PullRequest{
 		Num:           int(pr.Number),
 		Link:          pr.HtmlUrl,
 		Pkg:           impl.pkg.SoftwarePkgBasic,
@@ -195,6 +196,4 @@ func (impl *pullRequestImpl) submit() (dpr domain.PullRequest, err error) {
 			SrcRPMURL: impl.pkg.Application.SourceCode.SrcRPMURL,
 		},
 	}
-
-	return
 }

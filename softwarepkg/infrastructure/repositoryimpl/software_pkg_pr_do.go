@@ -30,21 +30,22 @@ type SoftwarePkgPRDO struct {
 }
 
 func (s softwarePkgPR) toSoftwarePkgPRDO(p *domain.PullRequest, id uuid.UUID, do *SoftwarePkgPRDO) (err error) {
-	*do = SoftwarePkgPRDO{
-		PkgId:        id,
-		Num:          p.Num,
-		Link:         p.Link,
-		PkgName:      p.Pkg.Name,
-		ImporterName: p.ImporterName,
-		SpecURL:      p.SrcCode.SpecURL,
-		SrcRPMURL:    p.SrcCode.SrcRPMURL,
-		CreatedAt:    time.Now().Unix(),
-		UpdatedAt:    time.Now().Unix(),
-	}
-
-	do.ImporterEmail, err = toEmailDO(p.ImporterEmail)
+	email, err := toEmailDO(p.ImporterEmail)
 	if err != nil {
 		return
+	}
+
+	*do = SoftwarePkgPRDO{
+		PkgId:         id,
+		Num:           p.Num,
+		Link:          p.Link,
+		PkgName:       p.Pkg.Name,
+		ImporterName:  p.ImporterName,
+		ImporterEmail: email,
+		SpecURL:       p.SrcCode.SpecURL,
+		SrcRPMURL:     p.SrcCode.SrcRPMURL,
+		CreatedAt:     time.Now().Unix(),
+		UpdatedAt:     time.Now().Unix(),
 	}
 
 	if p.IsMerged() {
@@ -57,6 +58,10 @@ func (s softwarePkgPR) toSoftwarePkgPRDO(p *domain.PullRequest, id uuid.UUID, do
 }
 
 func (do *SoftwarePkgPRDO) toDomainPullRequest() (pr domain.PullRequest, err error) {
+	if pr.ImporterEmail, err = toEmail(do.ImporterEmail); err != nil {
+		return
+	}
+
 	pr.Link = do.Link
 	pr.Num = do.Num
 
@@ -69,10 +74,6 @@ func (do *SoftwarePkgPRDO) toDomainPullRequest() (pr domain.PullRequest, err err
 	pr.ImporterName = do.ImporterName
 	pr.SrcCode.SpecURL = do.SpecURL
 	pr.SrcCode.SrcRPMURL = do.SrcRPMURL
-
-	if pr.ImporterEmail, err = toEmail(do.ImporterEmail); err != nil {
-		return
-	}
 
 	return
 }
