@@ -97,7 +97,9 @@ func main() {
 
 	pullRequest, err := pullrequestimpl.NewPullRequestImpl(c, cfg.PullRequest)
 	if err != nil {
-		logrus.Fatalf("init pullRequest failed, err:%s", err.Error())
+		logrus.Errorf("init pullRequest failed, err:%s", err.Error())
+
+		return
 	}
 
 	email := emailimpl.NewEmailService(cfg.Email)
