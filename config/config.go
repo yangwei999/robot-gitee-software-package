@@ -63,6 +63,7 @@ func (cfg *Config) configItems() []interface{} {
 		&cfg.Postgresql.Config,
 		&cfg.PullRequest,
 		&cfg.Code,
+		&cfg.Encryption,
 	}
 }
 

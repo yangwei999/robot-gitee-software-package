@@ -58,7 +58,7 @@ func (impl *pullRequestImpl) Create(pkg *domain.SoftwarePkg) (pr domain.PullRequ
 		return
 	}
 
-	impl.toPullRequest(&pr, &v, pkg)
+	pr = impl.toPullRequest(&v, pkg)
 
 	return
 }

@@ -3,10 +3,10 @@ package codeimpl
 import (
 	"fmt"
 
+	"github.com/opensourceways/server-common-lib/utils"
 	"github.com/sirupsen/logrus"
 
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain"
-	"github.com/opensourceways/robot-gitee-software-package/utils"
 )
 
 func NewCodeImpl(cfg Config) *codeImpl {

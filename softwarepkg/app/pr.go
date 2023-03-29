@@ -100,24 +100,22 @@ func (s *pullRequestService) HandleRepoCreated(pr *domain.PullRequest, url strin
 }
 
 func (s *pullRequestService) HandlePushCode(pr *domain.PullRequest) error {
+	if err := s.code.Push(pr); err != nil {
+		logrus.Errorf("pkgId %s push code err: %s", pr.Pkg.Id, err.Error())
+
+		return err
+	}
+
 	e := domain.CodePushedEvent{
 		PkgId:    pr.Pkg.Id,
 		Platform: domain.PlatformGitee,
-	}
-
-	if err := s.code.Push(pr); err != nil {
-		e.FailedReason = err.Error()
 	}
 
 	if err := s.producer.NotifyCodePushedResult(&e); err != nil {
 		return err
 	}
 
-	if e.FailedReason == "" {
-		return s.repo.Remove(pr.Num)
-	}
-
-	return nil
+	return s.repo.Remove(pr.Num)
 }
 
 func (s *pullRequestService) HandlePRMerged(cmd *CmdToHandlePRMerged) error {

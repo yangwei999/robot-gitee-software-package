@@ -166,9 +166,9 @@ func (impl *pullRequestImpl) submit(pkg *domain.SoftwarePkg) (pr sdk.PullRequest
 }
 
 func (impl *pullRequestImpl) toPullRequest(
-	dpr *domain.PullRequest, pr *sdk.PullRequest, pkg *domain.SoftwarePkg,
-) {
-	dpr = &domain.PullRequest{
+	pr *sdk.PullRequest, pkg *domain.SoftwarePkg,
+) domain.PullRequest {
+	return domain.PullRequest{
 		Num:           int(pr.Number),
 		Link:          pr.HtmlUrl,
 		Pkg:           pkg.SoftwarePkgBasic,
@@ -179,6 +179,4 @@ func (impl *pullRequestImpl) toPullRequest(
 			SrcRPMURL: pkg.Application.SourceCode.SrcRPMURL,
 		},
 	}
-
-	return
 }
