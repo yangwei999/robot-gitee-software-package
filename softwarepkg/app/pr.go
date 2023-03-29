@@ -100,15 +100,16 @@ func (s *pullRequestService) HandleRepoCreated(pr *domain.PullRequest, url strin
 }
 
 func (s *pullRequestService) HandlePushCode(pr *domain.PullRequest) error {
-	e := new(domain.CodePushedEvent)
-	e.PkgId = pr.Pkg.Id
-	e.Platform = domain.PlatformGitee
+	e := domain.CodePushedEvent{
+		PkgId:    pr.Pkg.Id,
+		Platform: domain.PlatformGitee,
+	}
 
 	if err := s.code.Push(pr); err != nil {
 		e.FailedReason = err.Error()
 	}
 
-	if err := s.producer.NotifyCodePushedResult(e); err != nil {
+	if err := s.producer.NotifyCodePushedResult(&e); err != nil {
 		return err
 	}
 
@@ -129,10 +130,12 @@ func (s *pullRequestService) HandlePRMerged(cmd *CmdToHandlePRMerged) error {
 		return nil
 	}
 
-	e := new(domain.PrCIFinishedEvent)
-	e.PkgId = pr.Pkg.Id
-	e.RelevantPR = pr.Link
-	if err = s.producer.NotifyCIResult(e); err != nil {
+	e := domain.PRCIFinishedEvent{
+		PkgId:      pr.Pkg.Id,
+		RelevantPR: pr.Link,
+	}
+
+	if err = s.producer.NotifyCIResult(&e); err != nil {
 		return err
 	}
 

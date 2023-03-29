@@ -9,27 +9,30 @@ import (
 	"github.com/opensourceways/robot-gitee-software-package/utils"
 )
 
-func NewCodeImpl(c Config) *codeImpl {
+func NewCodeImpl(cfg Config) *codeImpl {
+	gitUrl := fmt.Sprintf(
+		"https://%s:%s@gitee.com/%s/",
+		cfg.Robot.Username,
+		cfg.Robot.Token,
+		cfg.PkgSrcOrg,
+	)
+
 	return &codeImpl{
-		cfg: c,
+		gitUrl: gitUrl,
+		script: cfg.ShellScript,
 	}
 }
 
 type codeImpl struct {
-	cfg Config
+	gitUrl string
+	script string
 }
 
 func (impl *codeImpl) Push(pr *domain.PullRequest) error {
-	repoUrl := fmt.Sprintf(
-		"https://%s:%s@gitee.com/%s/%s.git",
-		impl.cfg.Robot.Username,
-		impl.cfg.Robot.Token,
-		impl.cfg.PkgSrcOrg,
-		pr.Pkg.Name,
-	)
+	repoUrl := fmt.Sprintf("%s%s.git", impl.gitUrl, pr.Pkg.Name)
 
 	params := []string{
-		impl.cfg.ShellScript,
+		impl.script,
 		repoUrl,
 		pr.Pkg.Name,
 		pr.ImporterName,

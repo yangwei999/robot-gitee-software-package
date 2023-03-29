@@ -95,9 +95,13 @@ func main() {
 		return
 	}
 
+	pullRequest, err := pullrequestimpl.NewPullRequestImpl(c, cfg.PullRequest)
+	if err != nil {
+		logrus.Fatalf("init pullRequest failed, err:%s", err.Error())
+	}
+
 	email := emailimpl.NewEmailService(cfg.Email)
 	message := messageimpl.NewMessageImpl(cfg.MessageServer.Message)
-	pullRequest := pullrequestimpl.NewPullRequestImpl(c, cfg.PullRequest)
 	repo := repositoryimpl.NewSoftwarePkgPR(&cfg.Postgresql.Config)
 	code := codeimpl.NewCodeImpl(cfg.Code)
 

@@ -4,21 +4,21 @@ import "encoding/json"
 
 const PlatformGitee = "gitee"
 
-type PrCIFinishedEvent struct {
+type PRCIFinishedEvent struct {
 	PkgId        string `json:"pkg_id"`
 	RelevantPR   string `json:"relevant_pr"`
 	RepoLink     string `json:"repo_link"`
 	FailedReason string `json:"failed_reason"`
 }
 
-func (e *PrCIFinishedEvent) Message() ([]byte, error) {
+func (e *PRCIFinishedEvent) Message() ([]byte, error) {
 	return json.Marshal(e)
 }
 
 func NewPRCIFinishedEvent(
 	pr *PullRequest, failedReason, repoLink string,
-) PrCIFinishedEvent {
-	return PrCIFinishedEvent{
+) PRCIFinishedEvent {
+	return PRCIFinishedEvent{
 		PkgId:        pr.Pkg.Id,
 		RelevantPR:   pr.Link,
 		RepoLink:     repoLink,
