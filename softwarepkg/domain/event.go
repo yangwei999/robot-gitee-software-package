@@ -16,11 +16,11 @@ func (e *PRCIFinishedEvent) Message() ([]byte, error) {
 }
 
 func NewPRCIFinishedEvent(
-	pr *PullRequest, failedReason, repoLink string,
+	pkg *SoftwarePkg, failedReason, repoLink string,
 ) PRCIFinishedEvent {
 	return PRCIFinishedEvent{
-		PkgId:        pr.Pkg.Id,
-		RelevantPR:   pr.Link,
+		PkgId:        pkg.Id,
+		RelevantPR:   pkg.PullRequest.Link,
 		RepoLink:     repoLink,
 		FailedReason: failedReason,
 	}
@@ -37,9 +37,9 @@ func (e *RepoCreatedEvent) Message() ([]byte, error) {
 	return json.Marshal(e)
 }
 
-func NewRepoCreatedEvent(pr *PullRequest, url, reason string) RepoCreatedEvent {
+func NewRepoCreatedEvent(pkg *SoftwarePkg, url, reason string) RepoCreatedEvent {
 	return RepoCreatedEvent{
-		PkgId:        pr.Pkg.Id,
+		PkgId:        pkg.Id,
 		Platform:     PlatformGitee,
 		RepoLink:     url,
 		FailedReason: reason,
