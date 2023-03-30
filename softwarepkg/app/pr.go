@@ -64,7 +64,12 @@ func (s *pullRequestService) HandleCI(cmd *CmdToHandleCI) error {
 		}
 	}
 
-	e := domain.NewPRCIFinishedEvent(&pkg, cmd.FailedReason, cmd.RepoLink)
+	e := domain.PRCIFinishedEvent{
+		PkgId:        pkg.Id,
+		RelevantPR:   pkg.PullRequest.Link,
+		RepoLink:     cmd.RepoLink,
+		FailedReason: cmd.FailedReason,
+	}
 
 	return s.producer.NotifyCIResult(&e)
 }
@@ -100,7 +105,11 @@ func (s *pullRequestService) HandleRepoCreated(pkg *domain.SoftwarePkg, url stri
 		return err
 	}
 
-	e := domain.NewRepoCreatedEvent(pkg, url, "")
+	e := domain.RepoCreatedEvent{
+		PkgId:    pkg.Id,
+		Platform: domain.PlatformGitee,
+		RepoLink: url,
+	}
 
 	return s.producer.NotifyRepoCreatedResult(&e)
 }
