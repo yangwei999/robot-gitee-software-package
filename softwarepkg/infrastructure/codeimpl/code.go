@@ -13,7 +13,7 @@ func NewCodeImpl(cfg Config) *codeImpl {
 	gitUrl := fmt.Sprintf(
 		"https://%s:%s@gitee.com/%s/",
 		cfg.Robot.Username,
-		cfg.Robot.Token,
+		"82bff85208414136c0ef726f6e76d0dc",
 		cfg.PkgSrcOrg,
 	)
 
