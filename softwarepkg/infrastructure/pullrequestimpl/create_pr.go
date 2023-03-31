@@ -2,12 +2,13 @@ package pullrequestimpl
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"html/template"
+	"os/exec"
 	"strings"
 
 	sdk "github.com/opensourceways/go-gitee/gitee"
-	"github.com/opensourceways/server-common-lib/utils"
 	"github.com/sirupsen/logrus"
 
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain"
@@ -50,7 +51,7 @@ func (impl *pullRequestImpl) createBranch(pkg *domain.SoftwarePkg) error {
 		newRepoData,
 	}
 
-	_, err, _ = utils.RunCmd(params...)
+	err = RunCmd(params...)
 	if err != nil {
 		logrus.Errorf(
 			"run create pr shell, err=%s, params=%v",
@@ -59,6 +60,29 @@ func (impl *pullRequestImpl) createBranch(pkg *domain.SoftwarePkg) error {
 	}
 
 	return err
+}
+
+func RunCmd(args ...string) error {
+	n := len(args)
+	if n == 0 {
+		return nil
+	}
+
+	cmd := args[0]
+
+	if n > 1 {
+		args = args[1:]
+	} else {
+		args = nil
+	}
+
+	c := exec.Command(cmd, args...)
+	out, err := c.CombinedOutput()
+	if err != nil {
+		return errors.New(string(out))
+	}
+
+	return nil
 }
 
 func (impl *pullRequestImpl) branchName(pkgName string) string {
