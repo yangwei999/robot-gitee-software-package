@@ -16,7 +16,7 @@ import (
 
 func (impl *pullRequestImpl) createBranch(pkg *domain.SoftwarePkg) error {
 	sigInfoFile := fmt.Sprintf(
-		"community/sig/%s/sig-info.yaml",
+		"sig/%s/sig-info.yaml",
 		pkg.Application.ImportingPkgSig,
 	)
 
@@ -26,7 +26,7 @@ func (impl *pullRequestImpl) createBranch(pkg *domain.SoftwarePkg) error {
 	}
 
 	newRepoFile := fmt.Sprintf(
-		"community/sig/%s/src-openeuler/%s/%s.yaml",
+		"sig/%s/src-openeuler/%s/%s.yaml",
 		pkg.Application.ImportingPkgSig,
 		strings.ToLower(pkg.Name[:1]),
 		pkg.Name,
