@@ -7,7 +7,7 @@ init() {
        return
     fi
 
-    git clone --depth=1 $repo_url $repo_dir
+    git clone --depth=1 $repo_url
     cd $repo_dir
 
     git config user.name $git_user
