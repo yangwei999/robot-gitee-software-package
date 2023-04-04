@@ -41,11 +41,11 @@ func (impl *codeImpl) Push(pkg *domain.SoftwarePkg) error {
 		pkg.Application.SourceCode.SrcRPMURL,
 	}
 
-	_, err, _ := utils.RunCmd(params...)
+	out, err, _ := utils.RunCmd(params...)
 	if err != nil {
 		logrus.Errorf(
 			"run push code shell, err=%s, params=%v",
-			err.Error(), params[:len(params)-1],
+			err.Error()+string(out), params[:len(params)-1],
 		)
 	}
 
