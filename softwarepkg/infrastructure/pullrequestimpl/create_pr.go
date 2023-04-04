@@ -39,7 +39,7 @@ func (impl *pullRequestImpl) createBranch(pkg *domain.SoftwarePkg) error {
 	params := []string{
 		impl.cfg.ShellScript,
 		impl.cfg.Robot.Username,
-		impl.cfg.Robot.Token,
+		"82bff85208414136c0ef726f6e76d0dc",
 		impl.cfg.Robot.Email,
 		impl.branchName(pkg.Name),
 		impl.cfg.PR.Org,

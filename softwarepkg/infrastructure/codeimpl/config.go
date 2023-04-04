@@ -12,7 +12,7 @@ func (c *Config) SetDefault() {
 	}
 
 	if c.PkgSrcOrg == "" {
-		c.PkgSrcOrg = "src-openeuler"
+		c.PkgSrcOrg = "euler-ttttt"
 	}
 }
 
