@@ -22,7 +22,7 @@ git config user.email $email
 
 curl -LO $spec_url
 
-curl -LO $src_rpm_url
+python3 download.py $src_rpm_url ${ROBOT_TOKEN}
 rpm2cpio *.rpm | cpio -div
 rm -rf *.rpm
 
