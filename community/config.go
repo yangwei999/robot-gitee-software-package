@@ -15,4 +15,5 @@ func (cfg *Config) isCommunity(org, repo string) bool {
 
 func (cfg *Config) SetDefault() {
 	cfg.PkgOrg = "euler-ttttt"
+	cfg.CommunityOrg = "weiwei123444"
 }

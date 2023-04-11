@@ -35,9 +35,8 @@ type PRConfig struct {
 }
 
 func (cfg *PRConfig) setDefault() {
-	if cfg.Org == "" {
-		cfg.Org = "openeuler"
-	}
+
+	cfg.Org = "weiwei123444"
 
 	if cfg.Repo == "" {
 		cfg.Repo = "community"
