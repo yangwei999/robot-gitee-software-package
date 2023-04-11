@@ -12,3 +12,7 @@ type Config struct {
 func (cfg *Config) isCommunity(org, repo string) bool {
 	return cfg.CommunityOrg == org && cfg.CommunityRepo == repo
 }
+
+func (cfg *Config) SetDefault() {
+	cfg.PkgOrg = "euler-ttttt"
+}

@@ -10,9 +10,8 @@ type Config struct {
 }
 
 func (cfg *Config) SetDefault() {
-	if cfg.PkgOrg == "" {
-		cfg.PkgOrg = "src-openeuler"
-	}
+
+	cfg.PkgOrg = "euler-ttttt"
 
 	if cfg.Interval <= 0 {
 		cfg.Interval = 10
