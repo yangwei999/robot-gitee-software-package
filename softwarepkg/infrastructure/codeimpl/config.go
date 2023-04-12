@@ -12,6 +12,7 @@ func (c *Config) SetDefault() {
 	}
 
 	c.PkgSrcOrg = "euler-ttttt"
+	c.Robot.Username = "weiwei123444"
 
 }
 
