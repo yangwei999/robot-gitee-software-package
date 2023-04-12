@@ -12,6 +12,7 @@ type Config struct {
 func (cfg *Config) SetDefault() {
 	cfg.PR.setDefault()
 	cfg.Template.setDefault()
+	cfg.Robot.Username = "weiwei123444"
 
 	if cfg.ShellScript == "" {
 		cfg.ShellScript = "/opt/app/repo.sh"
