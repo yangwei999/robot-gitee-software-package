@@ -6,8 +6,21 @@ repo_url=$1
 repo=$2
 user=$3
 email=$4
-spec_url=$5
-src_rpm_url=$6
+ci_repo_link=$5
+ci_repo=$6
+ci_pr_num=$7
+
+if [ ! -d $ci_repo ]; then
+  git clone -q $ci_repo_link
+fi
+
+cd $ci_repo
+
+git fetch origin "pull/$ci_pr_num/head:pr$ci_pr_num"
+
+git checkout "pr$ci_pr_num"
+
+cd ..
 
 if [ -d $repo ]; then
     rm -rf $repo
@@ -15,27 +28,18 @@ fi
 
 git clone $repo_url
 
+cp $ci_repo/*.spec $repo
+cp $ci_repo/*.rpm $repo
+
 cd $repo
-
-git config user.username $user
-git config user.email $email
-
-curl -LO $spec_url
-
-if [[ $src_rpm_url == *"gitee.com"* ]]
-then
-  /opt/app/download $src_rpm_url ${ROBOT_TOKEN}
-else
-  curl -LO $src_rpm_url
-fi
 
 rpm2cpio *.rpm | cpio -div
 rm -rf *.rpm
 
+git config user.username $user
+git config user.email $email
 git add .
-
 git commit -m 'add spec and rpm'
-
 git push
 
 cd ..
