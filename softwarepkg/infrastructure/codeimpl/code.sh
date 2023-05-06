@@ -2,10 +2,13 @@
 
 set -euo pipefail
 
+# repo_url is the url to push code, it contains username and token
 repo_url=$1
+# repo is the repo name of repo_url
 repo=$2
 user=$3
 email=$4
+# get code from the pr of ci repo, therefore it can guarantee that the code is CI checked
 ci_repo_link=$5
 ci_repo=$6
 ci_pr_num=$7
