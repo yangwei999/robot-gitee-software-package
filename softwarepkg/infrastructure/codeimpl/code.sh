@@ -16,9 +16,13 @@ fi
 
 cd $ci_repo
 
-git fetch origin "pull/$ci_pr_num/head:pr$ci_pr_num"
+git checkout master
 
-git checkout "pr$ci_pr_num"
+branch_name="pr$ci_pr_num"
+
+git fetch origin "pull/$ci_pr_num/head:$branch_name"
+
+git checkout $branch_name
 
 cd ..
 
