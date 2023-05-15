@@ -1,16 +1,15 @@
 package pullrequestimpl
 
 type Config struct {
-	PR             PRConfig       `json:"pr"`
-	Robot          RobotConfig    `json:"robot"`
-	Template       Template       `json:"template"`
-	ShellScript    string         `json:"shell_script"`
-	SoftwarePkg    SoftwarePkg    `json:"software_pkg"`
-	RobotToMergePR RobotToMergePR `json:"robot_to_merge_pr"`
+	CommunityRobot CommunityRobotConfig `json:"community_robot"`
+	Robot          RobotConfig          `json:"robot"`
+	Template       Template             `json:"template"`
+	ShellScript    string               `json:"shell_script"`
+	SoftwarePkg    SoftwarePkg          `json:"software_pkg"`
 }
 
 func (cfg *Config) SetDefault() {
-	cfg.PR.setDefault()
+	cfg.CommunityRobot.setDefault()
 	cfg.Template.setDefault()
 
 	if cfg.ShellScript == "" {
@@ -22,19 +21,17 @@ type RobotConfig struct {
 	Username string `json:"username" required:"true"`
 	Token    string `json:"token"    required:"true"`
 	Email    string `json:"email"    required:"true"`
+	Repo     string `json:"repo"     required:"true"`
 }
 
-type RobotToMergePR struct {
-	Token string `json:"token"    required:"true"`
-}
-
-type PRConfig struct {
-	NewRepoBranch NewRepoBranch `json:"new_repo_branch"`
+type CommunityRobotConfig struct {
+	NewRepoBranch NewRepoBranch `json:"new_repo_branch" required:"true"`
+	Token         string        `json:"token"           required:"true"`
 	Org           string        `json:"org"`
 	Repo          string        `json:"repo"`
 }
 
-func (cfg *PRConfig) setDefault() {
+func (cfg *CommunityRobotConfig) setDefault() {
 	if cfg.Org == "" {
 		cfg.Org = "openeuler"
 	}
