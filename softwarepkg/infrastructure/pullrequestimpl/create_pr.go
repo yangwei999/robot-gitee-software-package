@@ -71,9 +71,9 @@ func (impl *pullRequestImpl) genNewRepoData(pkg *domain.SoftwarePkg) (string, er
 	return impl.template.genRepoYaml(&repoYamlTplData{
 		PkgName:     pkg.Name,
 		PkgDesc:     pkg.Application.PackageDesc,
-		BranchName:  impl.cfg.CommunityRobot.NewRepoBranch.Name,
-		ProtectType: impl.cfg.CommunityRobot.NewRepoBranch.ProtectType,
-		PublicType:  impl.cfg.CommunityRobot.NewRepoBranch.PublicType,
+		BranchName:  impl.cfg.Robot.NewRepoBranch.Name,
+		ProtectType: impl.cfg.Robot.NewRepoBranch.ProtectType,
+		PublicType:  impl.cfg.Robot.NewRepoBranch.PublicType,
 	})
 }
 
