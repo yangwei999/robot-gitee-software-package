@@ -19,11 +19,11 @@ func (cfg *Config) SetDefault() {
 }
 
 type RobotConfig struct {
-	Username      string        `json:"username"        required:"true"`
-	Token         string        `json:"token"           required:"true"`
-	Email         string        `json:"email"           required:"true"`
-	Repo          string        `json:"repo"            required:"true"`
-	NewRepoBranch NewRepoBranch `json:"new_repo_branch" required:"true"`
+	Username      string        `json:"username" required:"true"`
+	Token         string        `json:"token"    required:"true"`
+	Email         string        `json:"email"    required:"true"`
+	Repo          string        `json:"repo"     required:"true"`
+	NewRepoBranch NewRepoBranch `json:"new_repo_branch"`
 }
 
 func (cfg *RobotConfig) setDefault() {
