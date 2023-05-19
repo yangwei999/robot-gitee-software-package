@@ -116,10 +116,12 @@ func run(cfg *config.Config) {
 		return
 	}
 
+	msgService := app.NewMessageService(repo, pullRequest)
+
 	// message server
 	err = messageserver.Init(
 		&cfg.MessageServer,
-		app.NewMessageService(repo, pullRequest),
+		msgService,
 		eventHandler,
 	)
 	if err != nil {
@@ -129,7 +131,7 @@ func run(cfg *config.Config) {
 	}
 
 	// watch
-	w := watch.NewWatchingImpl(cfg.Watch, repo, packageService)
+	w := watch.NewWatchingImpl(cfg.Watch, repo, packageService, msgService)
 	w.Start()
 	defer w.Stop()
 

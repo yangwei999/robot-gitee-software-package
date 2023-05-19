@@ -16,18 +16,20 @@ func NewWatchingImpl(
 	cfg Config,
 	repo repository.SoftwarePkg,
 	service app.PackageService,
+	msgService app.MessageService,
 ) *WatchingImpl {
 	cli := client.NewClient(func() []byte {
 		return []byte(cfg.RobotToken)
 	})
 
 	return &WatchingImpl{
-		cfg:     cfg,
-		cli:     cli,
-		repo:    repo,
-		service: service,
-		stop:    make(chan struct{}),
-		stopped: make(chan struct{}),
+		cfg:        cfg,
+		cli:        cli,
+		repo:       repo,
+		service:    service,
+		msgService: msgService,
+		stop:       make(chan struct{}),
+		stopped:    make(chan struct{}),
 	}
 }
 
@@ -36,12 +38,13 @@ type iClient interface {
 }
 
 type WatchingImpl struct {
-	cfg     Config
-	cli     iClient
-	repo    repository.SoftwarePkg
-	service app.PackageService
-	stop    chan struct{}
-	stopped chan struct{}
+	cfg        Config
+	cli        iClient
+	repo       repository.SoftwarePkg
+	service    app.PackageService
+	msgService app.MessageService
+	stop       chan struct{}
+	stopped    chan struct{}
 }
 
 func (impl *WatchingImpl) Start() {
@@ -88,6 +91,11 @@ func (impl *WatchingImpl) watch() {
 
 func (impl *WatchingImpl) handle(pkg domain.SoftwarePkg) {
 	switch pkg.Status {
+	case domain.PkgStatusFailed:
+		if err := impl.msgService.RetryPkg(&pkg); err != nil {
+			logrus.Errorf("handle retry pkg err: %s", err.Error())
+		}
+
 	case domain.PkgStatusPRMerged:
 		v, err := impl.cli.GetRepo(impl.cfg.PkgOrg, pkg.Name)
 		if err != nil {

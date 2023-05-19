@@ -2,6 +2,7 @@ package domain
 
 const (
 	PkgStatusInitialized = "initialized"
+	PkgStatusFailed      = "failed"
 	PkgStatusPRMerged    = "pr_merged"
 	PkgStatusRepoCreated = "repo_created"
 )
@@ -46,6 +47,10 @@ type SoftwarePkg struct {
 
 func (r *SoftwarePkg) SetPkgStatusInitialized() {
 	r.Status = PkgStatusInitialized
+}
+
+func (r *SoftwarePkg) SetPkgStatusFailed() {
+	r.Status = PkgStatusFailed
 }
 
 func (r *SoftwarePkg) SetPkgStatusMerged() {
