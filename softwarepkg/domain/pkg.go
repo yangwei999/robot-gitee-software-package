@@ -17,6 +17,7 @@ type SoftwarePkgApplication struct {
 	PackagePlatform   string
 	ImportingPkgSig   string
 	ReasonToImportPkg string
+	Upstream          string
 }
 
 type SoftwarePkgBasic struct {
