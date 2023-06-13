@@ -12,12 +12,12 @@ type SoftwarePkgSourceCode struct {
 }
 
 type SoftwarePkgApplication struct {
+	Upstream          string
 	SourceCode        SoftwarePkgSourceCode
 	PackageDesc       string
 	PackagePlatform   string
 	ImportingPkgSig   string
 	ReasonToImportPkg string
-	Upstream          string
 }
 
 type SoftwarePkgBasic struct {
