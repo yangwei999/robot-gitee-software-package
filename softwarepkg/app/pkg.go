@@ -187,7 +187,9 @@ func (s *packageService) HandlePRClosed(cmd *CmdToHandlePRClosed) error {
 		logrus.Errorf("send email failed: %s", err.Error())
 	}
 
-	return nil
+	pkg.SetPkgStatusRepoException()
+
+	return s.repo.Save(&pkg)
 }
 
 func (s *packageService) emailContent(url string) string {
@@ -197,6 +199,11 @@ func (s *packageService) emailContent(url string) string {
 func (s *packageService) notifyException(
 	pkg *domain.SoftwarePkg, cmd *CmdToHandleCI,
 ) {
+	pkg.SetPkgStatusRepoException()
+	if err := s.repo.Save(pkg); err != nil {
+		logrus.Errorf("save pkg when exception error: %s", err.Error())
+	}
+
 	subject := fmt.Sprintf(
 		"the ci of software package check failed: %s",
 		cmd.FailedReason,

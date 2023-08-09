@@ -5,6 +5,7 @@ const (
 	PkgStatusInitialized = "initialized"
 	PkgStatusPRMerged    = "pr_merged"
 	PkgStatusRepoCreated = "repo_created"
+	PkgStatusException   = "exception" // more information in the email of maintainer
 )
 
 type SoftwarePkgSourceCode struct {
@@ -59,6 +60,10 @@ func (r *SoftwarePkg) SetPkgStatusMerged() {
 
 func (r *SoftwarePkg) SetPkgStatusRepoCreated() {
 	r.Status = PkgStatusRepoCreated
+}
+
+func (r *SoftwarePkg) SetPkgStatusRepoException() {
+	r.Status = PkgStatusException
 }
 
 func (r *SoftwarePkg) IsPkgStatusMerged() bool {
