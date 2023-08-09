@@ -131,7 +131,7 @@ func run(cfg *config.Config) {
 	}
 
 	// watch
-	w := watch.NewWatchingImpl(cfg.Watch, repo, packageService, msgService)
+	w := watch.NewWatchingImpl(cfg.Watch, repo, packageService)
 	w.Start()
 	defer w.Stop()
 

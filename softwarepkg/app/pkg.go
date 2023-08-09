@@ -14,6 +14,7 @@ import (
 )
 
 type PackageService interface {
+	HandleCreatePR(cmd *CmdToHandleNewPkg) error
 	HandleCI(cmd *CmdToHandleCI) error
 	HandleRepoCreated(*domain.SoftwarePkg, string) error
 	HandlePRMerged(cmd *CmdToHandlePRMerged) error
@@ -43,6 +44,18 @@ type packageService struct {
 	email    email.Email
 	prCli    pullrequest.PullRequest
 	code     code.Code
+}
+
+func (s *packageService) HandleCreatePR(cmd *CmdToHandleNewPkg) error {
+	pr, err := s.prCli.Create(cmd)
+	if err == nil {
+		cmd.PullRequest = pr
+		cmd.SetPkgStatusInitialized()
+
+		return s.repo.Save(cmd)
+	}
+
+	return err
 }
 
 func (s *packageService) HandleCI(cmd *CmdToHandleCI) error {
