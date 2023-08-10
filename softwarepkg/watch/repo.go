@@ -58,7 +58,7 @@ func (impl *WatchingImpl) Stop() {
 func (impl *WatchingImpl) watch() {
 	interval := impl.cfg.IntervalDuration()
 
-	checkStop := func() bool {
+	needStop := func() bool {
 		select {
 		case <-impl.stop:
 			return true
@@ -66,6 +66,16 @@ func (impl *WatchingImpl) watch() {
 			return false
 		}
 	}
+
+	var timer *time.Timer
+
+	defer func() {
+		if timer != nil {
+			timer.Stop()
+		}
+
+		close(impl.stopped)
+	}()
 
 	for {
 		prs, err := impl.repo.FindAll()
@@ -76,14 +86,24 @@ func (impl *WatchingImpl) watch() {
 		for _, pr := range prs {
 			impl.handle(pr)
 
-			if checkStop() {
-				close(impl.stopped)
-
+			if needStop() {
 				return
 			}
 		}
 
-		time.Sleep(interval)
+		// time starts.
+		if timer == nil {
+			timer = time.NewTimer(interval)
+		} else {
+			timer.Reset(interval)
+		}
+
+		select {
+		case <-impl.stop:
+			return
+
+		case <-timer.C:
+		}
 	}
 }
 
@@ -91,31 +111,13 @@ func (impl *WatchingImpl) handle(pkg domain.SoftwarePkg) {
 	switch pkg.Status {
 	case domain.PkgStatusNew:
 		if err := impl.service.HandleCreatePR(&pkg); err != nil {
-			logrus.Errorf("handle retry pkg err: %s", err.Error())
+			logrus.Errorf("handle create pr err: %s", err.Error())
 		}
 
 	case domain.PkgStatusInitialized:
-		pr, err := impl.cli.GetGiteePullRequest(impl.cfg.CommunityOrg,
-			impl.cfg.CommunityRepo, int32(pkg.PullRequest.Num))
-		if err != nil {
-			logrus.Errorf("get pr %d err: %s", pkg.PullRequest.Num, err.Error())
-
-			return
+		if err := impl.handleInitialized(pkg); err != nil {
+			logrus.Errorf("handle initialized err: %s", err.Error())
 		}
-
-		if pr.State == sdk.StatusOpen {
-			if err = impl.handleCILabel(pkg, pr); err != nil {
-				logrus.Error(err.Error())
-			}
-
-			return
-		}
-
-		if err = impl.handlePRState(pr); err != nil {
-			logrus.Error(err.Error())
-		}
-
-		return
 
 	case domain.PkgStatusPRMerged:
 		v, err := impl.cli.GetRepo(impl.cfg.PkgOrg, pkg.Name)
@@ -132,6 +134,20 @@ func (impl *WatchingImpl) handle(pkg domain.SoftwarePkg) {
 			logrus.Errorf("handle push code err: %s", err.Error())
 		}
 	}
+}
+
+func (impl *WatchingImpl) handleInitialized(pkg domain.SoftwarePkg) error {
+	pr, err := impl.cli.GetGiteePullRequest(impl.cfg.CommunityOrg,
+		impl.cfg.CommunityRepo, int32(pkg.PullRequest.Num))
+	if err != nil {
+		return err
+	}
+
+	if pr.State == sdk.StatusOpen {
+		return impl.handleCILabel(pkg, pr)
+	}
+
+	return impl.handlePRState(pr)
 }
 
 func (impl *WatchingImpl) handleCILabel(pkg domain.SoftwarePkg, pr sdk.PullRequest) error {
