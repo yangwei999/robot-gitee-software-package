@@ -48,14 +48,14 @@ type packageService struct {
 
 func (s *packageService) HandleCreatePR(cmd *CmdToHandleNewPkg) error {
 	pr, err := s.prCli.Create(cmd)
-	if err == nil {
-		cmd.PullRequest = pr
-		cmd.SetPkgStatusInitialized()
-
-		return s.repo.Save(cmd)
+	if err != nil {
+		return err
 	}
 
-	return err
+	cmd.PullRequest = pr
+	cmd.SetPkgStatusPRCreated()
+
+	return s.repo.Save(cmd)
 }
 
 func (s *packageService) HandleCI(cmd *CmdToHandleCI) error {
@@ -92,7 +92,7 @@ func (s *packageService) mergePR(pkg domain.SoftwarePkg) error {
 		return fmt.Errorf("merge pr(%d) failed: %s", pkg.PullRequest.Num, err.Error())
 	}
 
-	pkg.SetPkgStatusMerged()
+	pkg.SetPkgStatusPRMerged()
 
 	if err := s.repo.Save(&pkg); err != nil {
 		logrus.Errorf("save pr(%d) failed: %s", pkg.PullRequest.Num, err.Error())
@@ -166,7 +166,7 @@ func (s *packageService) HandlePRMerged(cmd *CmdToHandlePRMerged) error {
 		return err
 	}
 
-	pkg.SetPkgStatusMerged()
+	pkg.SetPkgStatusPRMerged()
 
 	return s.repo.Save(&pkg)
 }
@@ -183,13 +183,13 @@ func (s *packageService) HandlePRClosed(cmd *CmdToHandlePRClosed) error {
 	)
 	content := s.emailContent(pkg.PullRequest.Link)
 
-	if err = s.email.Send(subject, content); err != nil {
-		logrus.Errorf("send email failed: %s", err.Error())
+	if err = s.email.Send(subject, content); err == nil {
+		pkg.SetPkgStatusRepoException()
+
+		return s.repo.Save(&pkg)
 	}
 
-	pkg.SetPkgStatusRepoException()
-
-	return s.repo.Save(&pkg)
+	return fmt.Errorf("send email failed: %s", err.Error())
 }
 
 func (s *packageService) emailContent(url string) string {
@@ -199,18 +199,19 @@ func (s *packageService) emailContent(url string) string {
 func (s *packageService) notifyException(
 	pkg *domain.SoftwarePkg, cmd *CmdToHandleCI,
 ) {
-	pkg.SetPkgStatusRepoException()
-	if err := s.repo.Save(pkg); err != nil {
-		logrus.Errorf("save pkg when exception error: %s", err.Error())
-	}
-
 	subject := fmt.Sprintf(
 		"the ci of software package check failed: %s",
 		cmd.FailedReason,
 	)
 	content := s.emailContent(pkg.PullRequest.Link)
 
-	if err := s.email.Send(subject, content); err != nil {
+	if err := s.email.Send(subject, content); err == nil {
+		pkg.SetPkgStatusRepoException()
+
+		if err := s.repo.Save(pkg); err != nil {
+			logrus.Errorf("save pkg when exception error: %s", err.Error())
+		}
+	} else {
 		logrus.Errorf("send email failed: %s", err.Error())
 	}
 }

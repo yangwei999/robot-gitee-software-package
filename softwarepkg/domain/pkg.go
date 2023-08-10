@@ -1,8 +1,8 @@
 package domain
 
 const (
-	PkgStatusNew         = "new"
 	PkgStatusInitialized = "initialized"
+	PkgStatusPRCreated   = "pr_created"
 	PkgStatusPRMerged    = "pr_merged"
 	PkgStatusRepoCreated = "repo_created"
 	PkgStatusException   = "exception" // more information in the email of maintainer
@@ -46,15 +46,15 @@ type SoftwarePkg struct {
 	CIPRNum     int
 }
 
-func (r *SoftwarePkg) SetPkgStatusNew() {
-	r.Status = PkgStatusNew
-}
-
 func (r *SoftwarePkg) SetPkgStatusInitialized() {
 	r.Status = PkgStatusInitialized
 }
 
-func (r *SoftwarePkg) SetPkgStatusMerged() {
+func (r *SoftwarePkg) SetPkgStatusPRCreated() {
+	r.Status = PkgStatusPRCreated
+}
+
+func (r *SoftwarePkg) SetPkgStatusPRMerged() {
 	r.Status = PkgStatusPRMerged
 }
 

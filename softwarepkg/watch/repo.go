@@ -109,14 +109,14 @@ func (impl *WatchingImpl) watch() {
 
 func (impl *WatchingImpl) handle(pkg domain.SoftwarePkg) {
 	switch pkg.Status {
-	case domain.PkgStatusNew:
+	case domain.PkgStatusInitialized:
 		if err := impl.service.HandleCreatePR(&pkg); err != nil {
 			logrus.Errorf("handle create pr err: %s", err.Error())
 		}
 
-	case domain.PkgStatusInitialized:
-		if err := impl.handleInitialized(pkg); err != nil {
-			logrus.Errorf("handle initialized err: %s", err.Error())
+	case domain.PkgStatusPRCreated:
+		if err := impl.handlePR(pkg); err != nil {
+			logrus.Errorf("handle pr err: %s", err.Error())
 		}
 
 	case domain.PkgStatusPRMerged:
@@ -136,7 +136,7 @@ func (impl *WatchingImpl) handle(pkg domain.SoftwarePkg) {
 	}
 }
 
-func (impl *WatchingImpl) handleInitialized(pkg domain.SoftwarePkg) error {
+func (impl *WatchingImpl) handlePR(pkg domain.SoftwarePkg) error {
 	pr, err := impl.cli.GetGiteePullRequest(impl.cfg.CommunityOrg,
 		impl.cfg.CommunityRepo, int32(pkg.PullRequest.Num))
 	if err != nil {

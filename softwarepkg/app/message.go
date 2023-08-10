@@ -23,7 +23,7 @@ type messageService struct {
 }
 
 func (s *messageService) NewPkg(cmd *CmdToHandleNewPkg) error {
-	cmd.SetPkgStatusNew()
+	cmd.SetPkgStatusInitialized()
 
 	return s.repo.Add(cmd)
 }
