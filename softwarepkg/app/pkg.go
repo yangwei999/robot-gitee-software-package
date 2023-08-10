@@ -183,13 +183,13 @@ func (s *packageService) HandlePRClosed(cmd *CmdToHandlePRClosed) error {
 	)
 	content := s.emailContent(pkg.PullRequest.Link)
 
-	if err = s.email.Send(subject, content); err == nil {
-		pkg.SetPkgStatusRepoException()
-
-		return s.repo.Save(&pkg)
+	if err = s.email.Send(subject, content); err != nil {
+		return fmt.Errorf("send email failed: %s", err.Error())
 	}
 
-	return fmt.Errorf("send email failed: %s", err.Error())
+	pkg.SetPkgStatusException()
+
+	return s.repo.Save(&pkg)
 }
 
 func (s *packageService) emailContent(url string) string {
@@ -205,13 +205,15 @@ func (s *packageService) notifyException(
 	)
 	content := s.emailContent(pkg.PullRequest.Link)
 
-	if err := s.email.Send(subject, content); err == nil {
-		pkg.SetPkgStatusRepoException()
-
-		if err := s.repo.Save(pkg); err != nil {
-			logrus.Errorf("save pkg when exception error: %s", err.Error())
-		}
-	} else {
+	if err := s.email.Send(subject, content); err != nil {
 		logrus.Errorf("send email failed: %s", err.Error())
+
+		return
+	}
+
+	pkg.SetPkgStatusException()
+
+	if err := s.repo.Save(pkg); err != nil {
+		logrus.Errorf("save pkg when exception error: %s", err.Error())
 	}
 }

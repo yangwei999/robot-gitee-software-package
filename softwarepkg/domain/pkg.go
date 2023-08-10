@@ -62,7 +62,7 @@ func (r *SoftwarePkg) SetPkgStatusRepoCreated() {
 	r.Status = PkgStatusRepoCreated
 }
 
-func (r *SoftwarePkg) SetPkgStatusRepoException() {
+func (r *SoftwarePkg) SetPkgStatusException() {
 	r.Status = PkgStatusException
 }
 
