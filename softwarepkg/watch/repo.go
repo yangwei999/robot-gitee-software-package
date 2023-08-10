@@ -140,11 +140,11 @@ func (impl *WatchingImpl) handleCILabel(pkg domain.SoftwarePkg, pr sdk.PullReque
 	}
 
 	for _, l := range pr.Labels {
-		if l.Name == impl.cfg.CISuccessLabel {
+		switch l.Name {
+		case impl.cfg.CISuccessLabel:
 			return impl.service.HandleCI(&cmd)
-		}
 
-		if l.Name == impl.cfg.CIFailureLabel {
+		case impl.cfg.CIFailureLabel:
 			cmd.FailedReason = "ci check failed"
 
 			if v, err := impl.cli.GetRepo(impl.cfg.PkgOrg, pkg.Name); err == nil {
