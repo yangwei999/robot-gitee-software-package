@@ -66,15 +66,13 @@ func (s *packageService) HandleCI(cmd *CmdToHandleCI) error {
 
 	if cmd.isSuccess() {
 		if err := s.mergePR(pkg); err != nil {
-			cmd.FailedReason = err.Error()
-			s.notifyException(&pkg, cmd)
+			return s.notifyException(&pkg, err.Error())
 		}
 	} else {
-		if cmd.isPkgExisted() {
-			s.closePR(pkg)
-		} else {
-			s.notifyException(&pkg, cmd)
+		if !cmd.isPkgExisted() {
+			return s.notifyException(&pkg, cmd.FailedReason)
 		}
+		s.closePR(pkg)
 	}
 
 	e := domain.PRCIFinishedEvent{
@@ -197,23 +195,23 @@ func (s *packageService) emailContent(url string) string {
 }
 
 func (s *packageService) notifyException(
-	pkg *domain.SoftwarePkg, cmd *CmdToHandleCI,
-) {
+	pkg *domain.SoftwarePkg, reason string,
+) error {
 	subject := fmt.Sprintf(
 		"the ci of software package check failed: %s",
-		cmd.FailedReason,
+		reason,
 	)
 	content := s.emailContent(pkg.PullRequest.Link)
 
 	if err := s.email.Send(subject, content); err != nil {
-		logrus.Errorf("send email failed: %s", err.Error())
-
-		return
+		return fmt.Errorf("send email failed: %s", err.Error())
 	}
 
 	pkg.SetPkgStatusException()
 
 	if err := s.repo.Save(pkg); err != nil {
-		logrus.Errorf("save pkg when exception error: %s", err.Error())
+		return fmt.Errorf("save pkg when exception error: %s", err.Error())
 	}
+
+	return nil
 }
