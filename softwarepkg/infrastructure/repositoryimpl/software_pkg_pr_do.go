@@ -25,6 +25,7 @@ type SoftwarePkgPRDO struct {
 	ImporterEmail string `gorm:"column:importer_email"`
 	SpecURL       string `gorm:"column:spec_url"`
 	SrcRPMURL     string `gorm:"column:src_rpm_url"`
+	Expiry        int64  `gorm:"column:expiry"`
 	CreatedAt     int64  `gorm:"column:created_at"`
 	UpdatedAt     int64  `gorm:"column:updated_at"`
 }
@@ -49,6 +50,7 @@ func (s softwarePkgPR) toSoftwarePkgPRDO(p *domain.SoftwarePkg, id uuid.UUID, do
 		ImporterEmail: email,
 		SpecURL:       p.Application.SourceCode.SpecURL,
 		SrcRPMURL:     p.Application.SourceCode.SrcRPMURL,
+		Expiry:        p.PRExceptionExpiry,
 		CreatedAt:     time.Now().Unix(),
 		UpdatedAt:     time.Now().Unix(),
 	}
@@ -61,13 +63,14 @@ func (do *SoftwarePkgPRDO) toDomainPullRequest() (pkg domain.SoftwarePkg, err er
 		return
 	}
 
-	pkg.PullRequest.Link = do.Link
-	pkg.PullRequest.Num = do.Num
-	pkg.CIPRNum = do.CIPRNum
-	pkg.Status = do.Status
-	pkg.Name = do.PkgName
 	pkg.Id = do.PkgId.String()
+	pkg.Name = do.PkgName
+	pkg.Status = do.Status
+	pkg.CIPRNum = do.CIPRNum
 	pkg.Importer.Name = do.ImporterName
+	pkg.PullRequest.Num = do.Num
+	pkg.PullRequest.Link = do.Link
+	pkg.PRExceptionExpiry = do.Expiry
 	pkg.Application.SourceCode.SpecURL = do.SpecURL
 	pkg.Application.SourceCode.SrcRPMURL = do.SrcRPMURL
 	pkg.Application.PackageDesc = do.PkgDesc
