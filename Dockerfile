@@ -19,7 +19,7 @@ RUN dnf -y update && \
 
 USER robot-gitee-software-package
 
-COPY --from=BUILDER /go/src/github.com/opensourceways/robot-gitee-software-package/robot-gitee-software-package /opt/app/robot-gitee-software-package
+COPY --chown=robot-gitee-software-package --from=BUILDER /go/src/github.com/opensourceways/robot-gitee-software-package/robot-gitee-software-package /opt/app/robot-gitee-software-package
 COPY --chown=robot-gitee-software-package softwarepkg/infrastructure/pullrequestimpl/create_branch.sh /opt/app/create_branch.sh
 COPY --chown=robot-gitee-software-package softwarepkg/infrastructure/pullrequestimpl/clone_repo.sh /opt/app/clone_repo.sh
 COPY --chown=robot-gitee-software-package softwarepkg/infrastructure/codeimpl/push_code.sh /opt/app/push_code.sh
