@@ -10,6 +10,5 @@ type Config struct {
 }
 
 type Topics struct {
-	NewPkg         string `json:"new_pkg"         required:"true"`
-	CommunityEvent string `json:"community_event" required:"true"`
+	NewPkg string `json:"new_pkg" required:"true"`
 }
