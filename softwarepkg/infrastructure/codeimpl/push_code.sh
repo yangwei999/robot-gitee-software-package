@@ -45,6 +45,14 @@ rm -rf *.rpm
 
 git config user.username $user
 git config user.email $email
+
+# get the files size more than 50MB but not in .git folder
+local large_files=$(find . -path '*/.git' -prune -o -type f -size +50M -print)
+if [ ! -z "${large_files}" ]; then
+    git lfs install
+    git lfs track --filename ${large_files}
+fi
+
 git add .
 git commit -m 'add spec and rpm'
 git push
