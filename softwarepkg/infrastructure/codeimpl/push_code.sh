@@ -43,7 +43,7 @@ cd $repo
 rpm2cpio *.rpm | cpio -div
 rm -rf *.rpm
 
-git config user.username $user
+git config user.name $user
 git config user.email $email
 
 # get the files size more than 50MB but not in .git folder

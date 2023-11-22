@@ -25,7 +25,7 @@ RUN dnf -y update && \
     echo > /etc/issue && echo > /etc/issue.net && echo > /etc/motd && \
     echo 'set +o history' >> /root/.bashrc && \
     sed -i 's/^PASS_MAX_DAYS.*/PASS_MAX_DAYS   90/' /etc/login.defs && rm -rf /tmp/* && \
-    mkdir /opt/app -p && chmod 700 /opt/app && chown 1000:1000 /opt/app
+    mkdir /opt/app -p && chmod 755 /opt/app && chown 1000:1000 /opt/app
 
 COPY --chown=root --from=BUILDER /git-lfs/bin/git-lfs /usr/local/bin/git-lfs
 COPY --chown=software-package --from=BUILDER /go/src/github.com/opensourceways/robot-gitee-software-package/robot-gitee-software-package /opt/app/robot-gitee-software-package
@@ -37,6 +37,6 @@ COPY --chown=software-package softwarepkg/infrastructure/template /opt/app/templ
 USER software-package
 
 RUN chmod 550 /opt/app/create_branch.sh /opt/app/clone_repo.sh /opt/app/push_code.sh /opt/app/robot-gitee-software-package && \
-    chmod -R o-rwx /opt/app
+    chmod -R o-rwx /opt/app/*
 
 ENTRYPOINT ["/opt/app/robot-gitee-software-package"]
