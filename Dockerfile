@@ -17,7 +17,7 @@ RUN GO111MODULE=on CGO_ENABLED=0 go build -a -o robot-gitee-software-package .
 FROM openeuler/openeuler:22.03
 RUN dnf -y update && \
     dnf in -y shadow && \
-    dnf install -y git && \
+    dnf install -y git cpio && \
     groupadd -g 1000 software-package && \
     useradd -u 1000 -g software-package -s /sbin/nologin -m software-package && \
     echo "umask 027" >> /home/software-package/.bashrc && \
