@@ -38,15 +38,15 @@ type codeImpl struct {
 	ciRepo  CIRepo
 }
 
-func (impl *codeImpl) Push(pkg *domain.SoftwarePkg) (string, error) {
-	repoUrl := fmt.Sprintf("%s%s.git", impl.gitUrl, pkg.Name)
+func (impl *codeImpl) Push(pkg *domain.PushCode) (string, error) {
+	repoUrl := fmt.Sprintf("%s%s.git", impl.gitUrl, pkg.PkgName)
 
 	params := []string{
 		impl.script,
 		repoUrl,
-		pkg.Name,
-		pkg.Importer.Name,
-		pkg.Importer.Email,
+		pkg.PkgName,
+		pkg.Importer,
+		pkg.ImporterEmail,
 		impl.ciRepo.Link,
 		impl.ciRepo.Repo,
 		strconv.Itoa(pkg.CIPRNum),
@@ -56,9 +56,9 @@ func (impl *codeImpl) Push(pkg *domain.SoftwarePkg) (string, error) {
 	if err != nil {
 		logrus.Errorf(
 			"run push code shell, err=%s, out=%s, params=%v",
-			err.Error(), out, params[:len(params)-1],
+			err.Error(), out, params,
 		)
 	}
 
-	return impl.repoUrl + pkg.Name, err
+	return impl.repoUrl + pkg.PkgName, err
 }

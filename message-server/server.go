@@ -2,43 +2,34 @@ package messageserver
 
 import (
 	"encoding/json"
-	"errors"
 
 	kafka "github.com/opensourceways/kafka-lib/agent"
 
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/app"
 )
 
-func Init(cfg *Config, service app.MessageService) error {
-	s := messageServer{
-		service: service,
+func Init(s app.PackageService, c Config) *MessageServer {
+	return &MessageServer{
+		cfg:     c,
+		service: s,
 	}
-
-	return s.subscribe(cfg)
 }
 
-type messageServer struct {
-	service app.MessageService
+type MessageServer struct {
+	cfg     Config
+	service app.PackageService
 }
 
-func (m *messageServer) subscribe(cfg *Config) error {
-	subscribers := map[string]kafka.Handler{
-		cfg.Topics.NewPkg: m.handleNewPkg,
-	}
-
-	return kafka.Subscribe(cfg.GroupName, subscribers)
+func (m *MessageServer) Run() error {
+	return kafka.Subscribe(m.cfg.GroupName, m.handlePushCode, []string{m.cfg.Topics.PushCode})
 }
 
-func (m *messageServer) handleNewPkg(msg []byte, header map[string]string) error {
-	if len(msg) == 0 {
-		return errors.New("unexpect message: The payload is empty")
-	}
+func (m *MessageServer) handlePushCode(payload []byte, header map[string]string) error {
+	msg := new(msgToHandlePushCode)
 
-	var v msgToHandleNewPkg
-	if err := json.Unmarshal(msg, &v); err != nil {
+	if err := json.Unmarshal(payload, msg); err != nil {
 		return err
 	}
 
-	cmd := v.toCmd()
-	return m.service.NewPkg(&cmd)
+	return m.service.HandlePushCode(msg)
 }

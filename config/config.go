@@ -6,12 +6,6 @@ import (
 
 	"github.com/opensourceways/robot-gitee-software-package/message-server"
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/codeimpl"
-	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/emailimpl"
-	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/postgresql"
-	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/pullrequestimpl"
-	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/repositoryimpl"
-	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/watch"
-	localutils "github.com/opensourceways/robot-gitee-software-package/utils"
 )
 
 func LoadConfig(path string) (*Config, error) {
@@ -36,33 +30,16 @@ type configSetDefault interface {
 	SetDefault()
 }
 
-type PostgresqlConfig struct {
-	DB postgresql.Config `json:"db" required:"true"`
-
-	repositoryimpl.Config
-}
-
 type Config struct {
-	Code          codeimpl.Config        `json:"code"`
-	Kafka         kafka.Config           `json:"kafka"`
-	Email         emailimpl.Config       `json:"email"`
-	Watch         watch.Config           `json:"watch"`
-	Postgresql    PostgresqlConfig       `json:"postgresql"`
-	Encryption    localutils.Config      `json:"encryption"`
-	PullRequest   pullrequestimpl.Config `json:"pull_request"`
-	MessageServer messageserver.Config   `json:"message_server"`
+	Code          codeimpl.Config      `json:"code"`
+	Kafka         kafka.Config         `json:"kafka"`
+	MessageServer messageserver.Config `json:"message_server"`
 }
 
 func (cfg *Config) configItems() []interface{} {
 	return []interface{}{
 		&cfg.Code,
 		&cfg.Kafka,
-		&cfg.Email,
-		&cfg.Watch,
-		&cfg.Postgresql.DB,
-		&cfg.Postgresql.Config,
-		&cfg.Encryption,
-		&cfg.PullRequest,
 		&cfg.MessageServer,
 	}
 }
