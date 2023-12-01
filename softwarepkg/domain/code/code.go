@@ -4,4 +4,5 @@ import "github.com/opensourceways/robot-gitee-software-package/softwarepkg/domai
 
 type Code interface {
 	Push(pkg *domain.PushCode) (string, error)
+	CheckRepoCreated(repo string) bool
 }
