@@ -6,6 +6,7 @@ import (
 
 	"github.com/opensourceways/robot-gitee-software-package/message-server"
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/codeimpl"
+	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/useradapterimpl"
 )
 
 func LoadConfig(path string) (*Config, error) {
@@ -31,9 +32,10 @@ type configSetDefault interface {
 }
 
 type Config struct {
-	Code          codeimpl.Config      `json:"code"`
-	Kafka         kafka.Config         `json:"kafka"`
-	MessageServer messageserver.Config `json:"message_server"`
+	Code          codeimpl.Config        `json:"code"`
+	Kafka         kafka.Config           `json:"kafka"`
+	MessageServer messageserver.Config   `json:"message_server"`
+	OmApi         useradapterimpl.Config `json:"om_api"`
 }
 
 func (cfg *Config) configItems() []interface{} {

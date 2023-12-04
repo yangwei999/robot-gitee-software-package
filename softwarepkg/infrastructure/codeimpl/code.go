@@ -50,8 +50,8 @@ func (impl *codeImpl) Push(pkg *domain.PushCode) (string, error) {
 		impl.script,
 		repoUrl,
 		pkg.PkgName,
-		pkg.Importer,
-		pkg.ImporterEmail,
+		pkg.Importer.Name,
+		pkg.Importer.Email,
 		impl.ciRepo.Link,
 		impl.ciRepo.Repo,
 	}

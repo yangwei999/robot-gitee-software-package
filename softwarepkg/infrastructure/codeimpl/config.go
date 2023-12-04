@@ -5,9 +5,9 @@ import "time"
 type Config struct {
 	ShellScript string      `json:"shell_script"`
 	PkgSrcOrg   string      `json:"pkg_src_org"`
+	Watch       Watch       `json:"watch"`
 	Robot       RobotConfig `json:"robot"   required:"true"`
 	CIRepo      CIRepo      `json:"ci_repo" required:"true"`
-	Watch       Watch       `json:"watch"`
 }
 
 func (c *Config) SetDefault() {

@@ -18,6 +18,7 @@ import (
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/app"
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/codeimpl"
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/messageimpl"
+	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/useradapterimpl"
 )
 
 type options struct {
@@ -74,6 +75,7 @@ func run(cfg *config.Config) {
 	pkgService := app.NewPackageService(
 		codeimpl.NewCodeImpl(cfg.Code),
 		messageimpl.NewMessageImpl(cfg.MessageServer.Message),
+		useradapterimpl.NewAdapterImpl(&cfg.OmApi),
 	)
 
 	msgServer := messageserver.Init(pkgService, cfg.MessageServer)

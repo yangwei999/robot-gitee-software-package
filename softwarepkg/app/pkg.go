@@ -10,6 +10,7 @@ import (
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain"
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain/code"
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain/message"
+	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain/useradapter"
 )
 
 type PackageService interface {
