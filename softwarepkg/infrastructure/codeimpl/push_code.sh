@@ -13,7 +13,8 @@ ci_repo_link=$5
 ci_repo=$6
 
 if [ ! -d $ci_repo ]; then
-  git clone -q $ci_repo_link
+  mkdir $ci_repo
+  git clone -q $ci_repo_link $ci_repo
 fi
 
 cd $ci_repo
