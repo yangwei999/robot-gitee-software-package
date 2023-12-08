@@ -39,8 +39,8 @@ type CIRepo struct {
 }
 
 type Watch struct {
-	Interval  int
-	LoopTimes int
+	Interval  int `json:"interval"`
+	LoopTimes int `json:"loop_times"`
 }
 
 func (c *Watch) IntervalDuration() time.Duration {
