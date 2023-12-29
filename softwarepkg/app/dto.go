@@ -2,27 +2,21 @@ package app
 
 import "github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain"
 
-type CmdToHandleNewPkg = domain.SoftwarePkg
-
-type CmdToHandleCI struct {
-	PRNum        int
-	RepoLink     string
-	FailedReason string
+type CmdToHandlePushCode struct {
+	Importer string `json:"importer"`
+	PkgId    string `json:"pkg_id"`
+	PkgName  string `json:"pkg_name"`
+	Platform string `json:"platform"`
 }
 
-func (c *CmdToHandleCI) isSuccess() bool {
-	return c.FailedReason == ""
-}
-
-func (c *CmdToHandleCI) isPkgExisted() bool {
-	return c.RepoLink != ""
-}
-
-type CmdToHandlePRMerged struct {
-	PRNum int
-}
-
-type CmdToHandlePRClosed struct {
-	PRNum      int
-	RejectedBy string
+func (c *CmdToHandlePushCode) toPushCode(email string) domain.PushCode {
+	return domain.PushCode{
+		PkgId:    c.PkgId,
+		PkgName:  c.PkgName,
+		Platform: c.Platform,
+		Importer: domain.Importer{
+			Name:  c.Importer,
+			Email: email,
+		},
+	}
 }

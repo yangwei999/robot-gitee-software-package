@@ -11,7 +11,6 @@ email=$4
 # get code from the pr of ci repo, therefore it can guarantee that the code is CI checked
 ci_repo_link=$5
 ci_repo=$6
-ci_pr_num=$7
 
 if [ ! -d $ci_repo ]; then
   git clone -q $ci_repo_link
@@ -21,11 +20,9 @@ cd $ci_repo
 
 git checkout master
 
-branch_name="pr$ci_pr_num"
+git fetch origin
 
-git fetch origin "pull/$ci_pr_num/head:$branch_name"
-
-git checkout $branch_name
+git checkout $repo
 
 cd ..
 
@@ -35,15 +32,11 @@ fi
 
 git clone $repo_url
 
-cp $ci_repo/*.spec $repo
-cp $ci_repo/*.rpm $repo
+cp $ci_repo/* $repo
 
 cd $repo
 
-rpm2cpio *.rpm | cpio -div
-rm -rf *.rpm
-
-git config user.username $user
+git config user.name $user
 git config user.email $email
 
 # get the files size more than 50MB but not in .git folder

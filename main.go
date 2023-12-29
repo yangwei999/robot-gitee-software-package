@@ -14,16 +14,11 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/opensourceways/robot-gitee-software-package/config"
-	"github.com/opensourceways/robot-gitee-software-package/message-server"
+	messageserver "github.com/opensourceways/robot-gitee-software-package/message-server"
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/app"
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/codeimpl"
-	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/emailimpl"
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/messageimpl"
-	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/postgresql"
-	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/pullrequestimpl"
-	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/repositoryimpl"
-	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/watch"
-	"github.com/opensourceways/robot-gitee-software-package/utils"
+	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/infrastructure/useradapterimpl"
 )
 
 type options struct {
@@ -63,22 +58,8 @@ func main() {
 		return
 	}
 
-	// postgresql
-	if err = postgresql.Init(&cfg.Postgresql.DB); err != nil {
-		logrus.Errorf("init db failed, err:%s", err.Error())
-
-		return
-	}
-
-	// encryption
-	if err = utils.InitEncryption(cfg.Encryption.EncryptionKey); err != nil {
-		logrus.Errorf("init encryption failed, err:%s", err.Error())
-
-		return
-	}
-
 	// kafka
-	if err = kafka.Init(&cfg.Kafka, log); err != nil {
+	if err = kafka.Init(&cfg.Kafka, log, nil, cfg.MessageServer.GroupName, false); err != nil {
 		logrus.Errorf("init kafka failed, err:%s", err.Error())
 
 		return
@@ -91,38 +72,16 @@ func main() {
 }
 
 func run(cfg *config.Config) {
-	pullRequest, err := pullrequestimpl.NewPullRequestImpl(&cfg.PullRequest)
-	if err != nil {
-		logrus.Errorf("init pull request failed, err:%s", err.Error())
-
-		return
-	}
-
-	repo := repositoryimpl.NewSoftwarePkgPR(&cfg.Postgresql.Config)
-
-	packageService := app.NewPackageService(
-		repo,
-		messageimpl.NewMessageImpl(cfg.MessageServer.Message),
-		emailimpl.NewEmailService(cfg.Email),
-		pullRequest,
+	pkgService := app.NewPackageService(
 		codeimpl.NewCodeImpl(cfg.Code),
+		messageimpl.NewMessageImpl(cfg.MessageServer.Message),
+		useradapterimpl.NewAdapterImpl(&cfg.OmApi),
 	)
 
-	// message server
-	err = messageserver.Init(
-		&cfg.MessageServer,
-		app.NewMessageService(repo, pullRequest),
-	)
-	if err != nil {
-		logrus.Errorf("init message server failed, err:%s", err.Error())
-
-		return
+	msgServer := messageserver.Init(pkgService, cfg.MessageServer)
+	if err := msgServer.Run(); err != nil {
+		logrus.Errorf("subscribe failed: %s", err.Error())
 	}
-
-	// watch
-	w := watch.NewWatchingImpl(cfg.Watch, repo, packageService)
-	w.Start()
-	defer w.Stop()
 
 	// wait
 	wait()
