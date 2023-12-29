@@ -5,8 +5,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain/useradapter"
-
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain"
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain/code"
 	"github.com/opensourceways/robot-gitee-software-package/softwarepkg/domain/message"
